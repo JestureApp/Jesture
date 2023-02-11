@@ -8,10 +8,20 @@
 #include <limits.h>
 #include <time.h>
 
-#include <GL/glew.h>
-#include <GLFW/glfw.h>
+#include "glad.h"
+#include <GLFW/glfw3.h>
+
+#include "nuklear.h"
+#include "nuklear_glfw_gl4.h"
 
 int main(int argc, char** argv) {
-    printf("test");
-    return 0;
+    glfwInit();
+    auto *window = glfwCreateWindow(1280, 720, "Test", nullptr, nullptr);
+    
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+    }
+    
+    glfwTerminate();
+    return EXIT_SUCCESS;
 }
