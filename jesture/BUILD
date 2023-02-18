@@ -2,9 +2,18 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+
+genrule(
+    name = "copy",
+    srcs = ["//third_party/Roboto/Roboto-Regular.ttf"],
+    outs = ["regular.ttf"],
+    output_to_bindir = 1,
+    cmd = "cp $< $@",
+)
+
 cc_binary(
-    name = "nuklear_demo",
-    srcs = ["nuklear_demo.cc"],
+    name = "jesture",
+    srcs = ["jesture.cc"],
     deps = [
         "@glad//:glad",
         "@nuklear//:nuklear"
