@@ -11,11 +11,10 @@ possible_linux_installs = [
     ("/usr", "include/qt6", "lib", "bin"),
 ]
 
-# Tried in order
-# possible_osx_paths = [
-#     ("/usr/local/opt/qt@6/include", "/usr/local/opt/qt6/lib", ""),
-#     ("/opt/homebrew/include", "/opt/homebrew/lib", ""),
-# ]
+possible_osx_installs = [
+    ("/usr/local/opt/qt@6", "include", "lib", "share/qt/libexec"),
+    ("/opt/homebrew", "include", "lib", "share/qt/libexec"),
+]
 
 def _validate_install(install, repository_ctx):
     base, inc, lib, bin = install
@@ -54,6 +53,8 @@ def auto_detect_qt_path(repository_ctx):
 
     if os_name.find("linux") != -1:
         possible_installs = possible_linux_installs
+    elif os_name.find("mac") != -1:
+        possible_installs = possible_osx_installs
     else:
         fail("Unsupported OS: %s" % os_name)
 
