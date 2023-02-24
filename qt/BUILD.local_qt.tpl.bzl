@@ -25,7 +25,7 @@ def qt_module(name, include_dir, lib, deps = []):
         includes = ["."],
         linkopts = [
             "-F%s" % local_qt_lib_path(),
-            "-l%s" % lib.replace("6", ""),
+            "-framework %s" % lib.replace("6", ""),
         ],
         target_compatible_with = ["@platforms//os:osx"],
     )
