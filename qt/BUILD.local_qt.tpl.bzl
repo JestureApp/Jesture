@@ -2,8 +2,6 @@
 Local Qt installation helper functions
 """
 
-load("@bazel_skylib//lib:paths.bzl", "paths")
-
 def local_qt_include_path():
     return "${include_path}"
 
