@@ -9,7 +9,7 @@ QT_LIBRARIES = [
     ("qml_models", "QtQmlModels", "Qt5QmlModels", []),
     ("gui", "QtGui", "Qt6Gui", [":qt_core"]),
     ("opengl", "QtOpenGL", "Qt6OpenGL", []),
-    ("multimedia", "QtMultimedia", "Qt6Multimedia", []),
+    ("multimedia", "QtMultimedia", "Qt6Multimedia", [":qt_core"]),
     ("multimedia_widgets", "QtMultimediaWidgets", "Qt6MultimediaWidgets", []),
 ]
 
@@ -58,8 +58,8 @@ QT_LIBRARIES = [
         # When being on Windows or Linux this glob will be empty
         hdrs = glob(["%s/**" % include_folder], allow_empty = True),
         includes = ["."],
-        linkopts = ["-F/usr/local/opt/qt5/lib"] + [
-            "-framework %s" % library_name.replace("6", "") # macOS qt libs do not contain a 5 - e.g. instead of Qt5Core the lib is called QtCore
+        linkopts = ["-F/usr/local/opt/qt6/lib"] + [
+            "-framework %s" % library_name.replace("6", "") # macOS qt libs do not contain a 6 - e.g. instead of Qt5Core the lib is called QtCore
             ],
         # Available from Bazel 4.0.0
         # target_compatible_with = ["@platforms//os:osx"],
