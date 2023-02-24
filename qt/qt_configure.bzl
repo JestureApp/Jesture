@@ -2,12 +2,54 @@
 Rules for setting up qt in the workspace 
 """
 
-def _get_env_var(repository_ctx, name, default = None):
-    """Returns a value from an environment variable."""
-    for key, value in repository_ctx.os.environ.items():
-        if name == key:
-            return value
-    return default
+def auto_detect_qt_path(repository_ctx):
+    """
+    Detects the path to the Qt installation.
+
+    Args:
+       repository_ctx: repository context
+
+    Returns:
+       (include_path, lib_path)
+    """
+
+    os_name = repository_ctx.os.name.lower()
+
+    if os_name.find("linux")!= -1:
+        possible_include_paths = [
+            "/usr/include/qt6"
+        ]
+
+        possible_lib_paths = [
+            "/usr/lib"
+        ]
+    elif os_name.find("mac")!= -1:
+        possible_include_paths = [
+            "/usr/local/opt/qt@6", 
+            "/opt/homebrew/include"
+        ]
+        possible_lib_paths = [
+            "/usr/local/opt/qt6/lib", 
+            "/opt/homebrew/lib"
+        ]
+    else:
+        fail("Unsupported OS: %s" % os_name)
+
+    include_path = None
+
+    for path in possible_include_paths:
+        if repository_ctx.path(path).exists:
+            include_path = path
+            break
+
+    lib_path = None
+
+    for path in possible_lib_paths:
+        if repository_ctx.path(path).exists:
+            lib_path = path
+            break
+
+    return include_path, lib_path
 
 def qt_autoconf_impl(repository_ctx):
     """
@@ -16,41 +58,23 @@ def qt_autoconf_impl(repository_ctx):
     Args:
        repository_ctx: repository context
     """
-    os_name = repository_ctx.os.name.lower()
-    is_linux_machine = False
-    
-    if os_name.find("linux") != -1:
-        is_linux_machine = True
-        
-        default_qt_path = "/usr/include/qt6"
-    elif os_name.find("mac") != -1:
-        # assume Qt was installed using `brew install qt@5`
-        default_qt_path = "/usr/local/opt/qt@6"
 
-        if not repository_ctx.path(default_qt_path).exists:
-            default_qt_path = "/opt/homebrew/include"
-    else:
-        fail("Unsupported OS: %s" % os_name)
+    include_path, lib_path = auto_detect_qt_path(repository_ctx)
 
-    if repository_ctx.path(default_qt_path).exists:
-        # buildifier: disable=print
-        print("Installation available on the default path: ", default_qt_path)
+    if not include_path or not repository_ctx.path(include_path).exists:
+        fail("Qt include directory %s does not exist" % include_path)
 
-    qt_path = _get_env_var(repository_ctx, "BAZEL_RULES_QT_DIR", default_qt_path)
-    if qt_path != default_qt_path:
-        # buildifier: disable=print
-        print("However BAZEL_RULES_QT_DIR is defined and will be used: ", qt_path) # ignore: print
-
-        # In Linux in case that we have a standalone installation, we need to provide the path inside the include folder
-        qt_path_with_include = qt_path + "/include"
-        if is_linux_machine and repository_ctx.path(qt_path_with_include).exists:
-            qt_path = qt_path_with_include
+    if not lib_path or not repository_ctx.path(lib_path).exists:
+        fail("Qt include directory %s does not exist" % lib_path)
    
     repository_ctx.file("BUILD", "# empty BUILD file so that bazel sees this as a valid package directory")
     repository_ctx.template(
         "local_qt.bzl",
-        repository_ctx.path(Label("@jesture//qt:BUILD.local_qt.tpl")),
-        {"%{path}": qt_path},
+        repository_ctx.path(Label("@jesture//qt:BUILD.local_qt.tpl.bzl")),
+        {
+            "${include_path}": include_path,
+            "${lib_path}": lib_path,
+        },
     )
 
 qt_autoconf = repository_rule(
