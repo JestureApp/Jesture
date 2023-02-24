@@ -19,3 +19,9 @@ def jesture_repositories():
         sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
     )
 
+    maybe(
+        git_repository,
+        name = "jesturepipe",
+        remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
+        tag = "v0.1.1",
+    )

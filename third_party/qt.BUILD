@@ -1,4 +1,4 @@
-load("@local_config_qt//:local_qt.bzl", "qt_module")
+load("@local_config_qt//:local_qt.bzl", "add_binary", "qt_module")
 
 qt_module(
     name = "qt_core",
@@ -6,14 +6,13 @@ qt_module(
     lib = "Qt6Core",
 )
 
-
 qt_module(
     name = "qt_gui",
     include_dir = "QtGui",
     lib = "Qt6Gui",
     deps = [
         ":qt_core",
-    ]
+    ],
 )
 
 qt_module(
@@ -23,9 +22,8 @@ qt_module(
     deps = [
         ":qt_core",
         ":qt_gui",
-    ]
+    ],
 )
-
 
 qt_module(
     name = "qt_multimedia",
@@ -33,7 +31,7 @@ qt_module(
     lib = "Qt6Multimedia",
     deps = [
         ":qt_core",
-    ]
+    ],
 )
 
 qt_module(
@@ -42,5 +40,7 @@ qt_module(
     lib = "Qt6MultimediaWidgets",
     deps = [
         ":qt_core",
-    ]
+    ],
 )
+
+add_binary(name = "moc")

@@ -2,6 +2,43 @@
 Rules for setting up qt in the workspace 
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
+
+# Possible paths are tried in order
+# Structured as (repository path, include directory, library directory, binary directory)
+possible_linux_installs = [
+    ("/usr", "include/qt6", "lib", "lib/qt6"),
+    ("/usr", "include/qt6", "lib", "bin"),
+]
+
+# Tried in order
+# possible_osx_paths = [
+#     ("/usr/local/opt/qt@6/include", "/usr/local/opt/qt6/lib", ""),
+#     ("/opt/homebrew/include", "/opt/homebrew/lib", ""),
+# ]
+
+def _validate_install(install, repository_ctx):
+    base, inc, lib, bin = install
+
+    inc_abs = paths.join(base, inc)
+    lib_abs = paths.join(base, lib)
+    bin_abs = paths.join(base, bin)
+
+    if not repository_ctx.path(inc_abs).exists or \
+       not repository_ctx.path(lib_abs).exists or \
+       not repository_ctx.path(bin_abs).exists:
+        return False
+
+    moc_path = paths.join(bin_abs, "moc")
+    if not repository_ctx.path(moc_path).exists:
+        return False
+
+    res = repository_ctx.execute([moc_path, "--version"])
+    if res.return_code != 0 or res.stdout.index("6.") == -1:
+        return False
+
+    return True
+
 def auto_detect_qt_path(repository_ctx):
     """
     Detects the path to the Qt installation.
@@ -15,28 +52,19 @@ def auto_detect_qt_path(repository_ctx):
 
     os_name = repository_ctx.os.name.lower()
 
-    if os_name.find("linux")!= -1:
-        possible_paths = [
-            ("/usr/include/qt6", "/usr/lib")
-        ]
-    elif os_name.find("mac")!= -1:
-
-        possible_paths = [
-            ( "/usr/local/opt/qt@6/include", "/usr/local/opt/qt6/lib"),
-            ("/opt/homebrew/include", "/opt/homebrew/lib")
-        ]
+    if os_name.find("linux") != -1:
+        possible_installs = possible_linux_installs
     else:
         fail("Unsupported OS: %s" % os_name)
 
-    include_path, lib_path = None, None
+    install = None
 
-    for i_path, l_path in possible_paths:
-        if repository_ctx.path(i_path).exists and repository_ctx.path(l_path).exists:
-            include_path = i_path
-            lib_path = l_path
+    for inst in possible_installs:
+        if _validate_install(inst, repository_ctx):
+            install = inst
             break
 
-    return include_path, lib_path
+    return install
 
 def qt_autoconf_impl(repository_ctx):
     """
@@ -46,21 +74,22 @@ def qt_autoconf_impl(repository_ctx):
        repository_ctx: repository context
     """
 
-    include_path, lib_path = auto_detect_qt_path(repository_ctx)
+    install = auto_detect_qt_path(repository_ctx)
 
-    if not include_path or not repository_ctx.path(include_path).exists:
-        fail("Qt include directory %s does not exist" % include_path)
+    if not install:
+        fail("Failed to detect viable Qt6 installation.")
 
-    if not lib_path or not repository_ctx.path(lib_path).exists:
-        fail("Qt include directory %s does not exist" % lib_path)
-   
+    base, inc, lib, bin = install
+
     repository_ctx.file("BUILD", "# empty BUILD file so that bazel sees this as a valid package directory")
     repository_ctx.template(
         "local_qt.bzl",
         repository_ctx.path(Label("@jesture//qt:BUILD.local_qt.tpl.bzl")),
         {
-            "${include_path}": include_path,
-            "${lib_path}": lib_path,
+            "${base_path}": base,
+            "${include_path}": inc,
+            "${lib_path}": lib,
+            "${bin_path}": bin,
         },
     )
 
