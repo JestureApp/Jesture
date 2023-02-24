@@ -24,7 +24,7 @@ def qt_module(name, include_dir, lib, deps = []):
         hdrs = native.glob(["%s/**" % include_dir], allow_empty = True),
         includes = ["."],
         linkopts = [
-            "-F%s" % paths.join(local_qt_lib_path(), "lib"),
+            "-F%s" % local_qt_lib_path(),
             "-l%s" % lib.replace("6", ""),
         ],
         target_compatible_with = ["@platforms//os:osx"],
