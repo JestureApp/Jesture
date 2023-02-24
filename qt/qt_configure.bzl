@@ -16,37 +16,24 @@ def auto_detect_qt_path(repository_ctx):
     os_name = repository_ctx.os.name.lower()
 
     if os_name.find("linux")!= -1:
-        possible_include_paths = [
-            "/usr/include/qt6"
-        ]
-
-        possible_lib_paths = [
-            "/usr/lib"
+        possible_paths = [
+            ("/usr/include/qt6", "/usr/lib")
         ]
     elif os_name.find("mac")!= -1:
-        possible_include_paths = [
-            "/usr/local/opt/qt@6", 
-            "/opt/homebrew/include"
-        ]
-        possible_lib_paths = [
-            "/usr/local/opt/qt6/lib", 
-            "/opt/homebrew/lib"
+
+        possible_paths = [
+            ( "/usr/local/opt/qt@6", "/usr/local/opt/qt6/lib"),
+            ("/opt/homebrew/include", "/opt/homebrew/lib")
         ]
     else:
         fail("Unsupported OS: %s" % os_name)
 
-    include_path = None
+    include_path, lib_path = None, None
 
-    for path in possible_include_paths:
-        if repository_ctx.path(path).exists:
-            include_path = path
-            break
-
-    lib_path = None
-
-    for path in possible_lib_paths:
-        if repository_ctx.path(path).exists:
-            lib_path = path
+    for i_path, l_path in possible_paths:
+        if repository_ctx.path(i_path).exists and repository_ctx.path(l_path).exists:
+            include_path = i_path
+            lib_path = l_path
             break
 
     return include_path, lib_path
