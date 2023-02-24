@@ -22,7 +22,7 @@ def auto_detect_qt_path(repository_ctx):
     elif os_name.find("mac")!= -1:
 
         possible_paths = [
-            ( "/usr/local/opt/qt@6", "/usr/local/opt/qt6/lib"),
+            ( "/usr/local/opt/qt@6/include", "/usr/local/opt/qt6/lib"),
             ("/opt/homebrew/include", "/opt/homebrew/lib")
         ]
     else:
