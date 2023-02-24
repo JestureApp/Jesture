@@ -28,7 +28,7 @@ def qt_autoconf_impl(repository_ctx):
         default_qt_path = "/usr/local/opt/qt@6"
 
         if not repository_ctx.path(default_qt_path).exists:
-            default_qt_path = "/opt/homebrew/"
+            default_qt_path = "/opt/homebrew/include"
     else:
         fail("Unsupported OS: %s" % os_name)
 
