@@ -26,6 +26,9 @@ def qt_autoconf_impl(repository_ctx):
     elif os_name.find("mac") != -1:
         # assume Qt was installed using `brew install qt@5`
         default_qt_path = "/usr/local/opt/qt@6"
+
+        if not repository_ctx.path(default_qt_path).exists:
+            default_qt_path = "/opt/homebrew/"
     else:
         fail("Unsupported OS: %s" % os_name)
 
