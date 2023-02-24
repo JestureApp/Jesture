@@ -9,9 +9,13 @@
 #include <time.h>
 #include <map>
 #include <string>
+#include <vector>
+#include <iostream>
 
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include <nlohmann/json.hpp>
+#include "platform_folders.h"
 
 // Nuklear feature flags
 #define NK_INCLUDE_FIXED_TYPES
@@ -38,74 +42,56 @@
 struct nk_glfw glfw = {0};
 struct nk_context* context;
 int width, height;
-int first_menu = 0, second_menu = 0;
+int first_menu = -1, second_menu = -1;
 
 using namespace std;
 
 // Mockup UI data
+auto config_string = R"(
+{
+    "gestures": [
+        {
+            "name": "Peace",
+            "finger1": false,
+            "finger2": true,
+            "finger3": true,
+            "finger4": false,
+            "finger5": false
+        },
+        {
+            "name": "Point",
+            "finger1": true,
+            "finger2": true,
+            "finger3": false,
+            "finger4": false,
+            "finger5": false
+        },
+        {
+            "name": "Stop",
+            "finger1": true,
+            "finger2": true,
+            "finger3": true,
+            "finger4": true,
+            "finger5": true
+        }
+    ],
+    "preferences": {
+        "recognizer_accuracy": 1,
+        "camera": 0
+    }
+}
+)";
+
 struct GestureParameters {
-    string param1;
-    string param2;
-    string param3;
+    string name;
+    bool finger1;
+    bool finger2;
+    bool finger3;
+    bool finger4;
+    bool finger5;
 };
-map<string, GestureParameters> gestures;
-GestureParameters peace_parameters, point_parameters;
-const char* items[] = {
-    "Item 1",
-    "Item 2",
-    "Item 3",
-    "Item 4",
-    "Item 5",
-    "Item 6",
-    "Item 7",
-    "Item 8",
-    "Item 9",
-    "Item 10",
-    "Item 11",
-    "Item 12",
-    "Item 13",
-    "Item 14",
-    "Item 15",
-    "Item 16",
-    "Item 17",
-    "Item 18",
-    "Item 19",
-    "Item 20",
-    "Item 21",
-    "Item 22",
-    "Item 23",
-    "Item 24",
-    "Item 25"
-};
-const char* settings[] = {
-    "Setting 1",
-    "Setting 2",
-    "Setting 3",
-    "Setting 4",
-    "Setting 5",
-    "Setting 6",
-    "Setting 7",
-    "Setting 8",
-    "Setting 9",
-    "Setting 10",
-    "Setting 11",
-    "Setting 12",
-    "Setting 13",
-    "Setting 14",
-    "Setting 15",
-    "Setting 16",
-    "Setting 17",
-    "Setting 18",
-    "Setting 19",
-    "Setting 20",
-    "Setting 21",
-    "Setting 22",
-    "Setting 23",
-    "Setting 24",
-    "Setting 25"
-};
-
-
+vector<GestureParameters> gestures;
+map<string, int> preferences;
 
 // Draw call
 static void draw() {
@@ -116,68 +102,65 @@ static void draw() {
     if (nk_begin(context, "HUD", nk_rect(0, 0, 300, 64), NK_WINDOW_NO_SCROLLBAR)) {
         nk_layout_row_dynamic(context, 32, 2);
         if(nk_button_label(context, "Gestures")) {
-            if (first_menu == 1) {
+            if (first_menu == 0) {
+                first_menu = -1;
+            } else {
                 first_menu = 0;
+            }
+            second_menu = -1;
+        }
+        if(nk_button_label(context, "Settings")) {
+            if (first_menu == 1) {
+                first_menu = -1;
             } else {
                 first_menu = 1;
             }
-            second_menu = 0;
-        }
-        if(nk_button_label(context, "Settings")) {
-            if (first_menu == 2) {
-                first_menu = 0;
-            } else {
-                first_menu = 2;
-            }
-            second_menu = 0;
+            second_menu = -1;
         }
         nk_end(context);
     }
     
     // Gesture menu
-    if (first_menu == 1 && nk_begin(context, "Gesture List", nk_rect(0, 64, 300, height - 64), NK_WINDOW_BORDER)) {
-        nk_layout_row_dynamic(context, 700, 1);
+    if (first_menu == 0 && nk_begin(context, "Gesture List", nk_rect(0, 64, 300, height - 64), NK_WINDOW_BORDER)) {
+        nk_layout_row_dynamic(context, 600, 1);
         if (nk_group_begin(context, "column1", NK_WINDOW_BORDER)) {
-            for (int i = 0; i < 25; i++) {
+            for (int i = 0; i < gestures.size(); i++) {
                 nk_layout_row_dynamic(context, 30, 1);
-                if(nk_button_label(context, items[i])) {
-                    second_menu = i + 1;
+                if(nk_button_label(context, gestures[i].name.c_str())) {
+                    if (second_menu == i) {
+                        second_menu = -1;
+                    } else {
+                        second_menu = i;
+                    }
                 }
             }
             nk_group_end(context);
         }
-        /*
-        enum {EASY, HARD};
-        static int op = EASY;
-        static int property = 20;
-        nk_layout_row_static(context, 30, 80, 1);
-        if (nk_button_label(context, "button"))
-            fprintf(stdout, "button pressed\n");
-
-        nk_layout_row_dynamic(context, 30, 2);
-        if (nk_option_label(context, "easy", op == EASY)) op = EASY;
-        if (nk_option_label(context, "hard", op == HARD)) op = HARD;
-
-        nk_layout_row_dynamic(context, 25, 1);
-        nk_property_int(context, "Counter:", 0, &property, 100, 10, 1);*/
+        nk_layout_row_dynamic(context, 30, 1);
+        if (nk_button_label(context, "Save")) {
+            
+        }
         nk_end(context);
     }
     
     // Settings menu
-    if (first_menu == 2 && nk_begin(context, "Settings", nk_rect(0, 64, 300, height - 64), NK_WINDOW_BORDER)) {
+    if (first_menu == 1 && nk_begin(context, "Settings", nk_rect(0, 64, 300, height - 64), NK_WINDOW_BORDER)) {
         nk_layout_row_dynamic(context, 700, 1);
         if (nk_group_begin(context, "column1", NK_WINDOW_BORDER)) {
-            for (int i = 0; i < 25; i++) {
-                nk_layout_row_dynamic(context, 30, 1);
-                nk_button_label(context, settings[i]);
-            }
+            nk_layout_row_dynamic(context, 30, 1);
+            nk_label(context, "Accuracy", NK_TEXT_LEFT);
+            nk_layout_row_dynamic(context, 30, 1);
+            nk_label(context, "Camera", NK_TEXT_LEFT);
             nk_group_end(context);
         }
         nk_end(context);
     }
     
     // Gesture Inspector menu
-    if (second_menu > 0 && nk_begin(context, "Gesture Inspector", nk_rect(300, 64, 300, height - 64), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
+    if (second_menu > -1 && nk_begin(context, "Gesture Inspector", nk_rect(300, 64, 300, height - 64), NK_WINDOW_BORDER|NK_WINDOW_TITLE)) {
+        nk_layout_row_dynamic(context, 30, 2);
+        nk_label(context, "Name:", NK_TEXT_LEFT);
+        nk_label(context, gestures[second_menu].name.c_str(), NK_TEXT_RIGHT);
         nk_end(context);
     }
     
@@ -191,6 +174,28 @@ static void draw() {
         * rendering the UI. */
     // Draw Nuklear UI
     nk_glfw3_render(&glfw, NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+}
+
+
+
+// Find config JSON file and load into global state
+static void read_config() {
+    auto config = nlohmann::json::parse(config_string);
+    // Initialize Mockup data
+    for (auto& gesture : config["gestures"]) {
+        GestureParameters parameters;
+        parameters.name = gesture["name"];
+        parameters.finger1 = gesture["finger1"];
+        parameters.finger2 = gesture["finger2"];
+        parameters.finger3 = gesture["finger3"];
+        parameters.finger4 = gesture["finger4"];
+        parameters.finger5 = gesture["finger5"];
+        gestures.push_back(parameters);
+    }
+    
+    for (auto& [preference, value]: config["preferences"].items()) {
+        preferences[preference] = value;
+    }
 }
 
 
@@ -213,16 +218,6 @@ static void scroll_input(GLFWwindow* window, double _, double yoff) {
 
 
 int main(int argc, char** argv) {
-    // Initialize Mockup data
-    peace_parameters.param1 = "value1";
-    peace_parameters.param2 = "value2";
-    peace_parameters.param3 = "value3";
-    point_parameters.param1 = "value4";
-    point_parameters.param2 = "value5";
-    point_parameters.param3 = "value6";
-    gestures["Peace"] = peace_parameters;
-    gestures["Point"] = point_parameters;
-    
     // Initialize GLFW
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) return EXIT_FAILURE;
@@ -268,13 +263,16 @@ int main(int argc, char** argv) {
     // Create font atlas, load into context
     nk_font_atlas *atlas;
     nk_glfw3_font_stash_begin(&glfw, &atlas);
-    struct nk_font *regular = nk_font_atlas_add_from_file(atlas, "third_party/Roboto-Regular.ttf", 24, &config);
+    struct nk_font *regular = nk_font_atlas_add_from_file(atlas, "third_party/Roboto-Regular.ttf", 20, &config);
     nk_glfw3_font_stash_end(&glfw);
     if(!regular) {
         fprintf(stderr, "Failed to load font.\n");
     } else {
         nk_style_set_font(context, &regular->handle);
     }
+    
+    // Read app config from file
+    read_config();
     
     // Event loop
     while (!glfwWindowShouldClose(window)) {

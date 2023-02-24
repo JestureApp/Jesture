@@ -7,7 +7,9 @@ cc_binary(
     srcs = ["jesture.cc"],
     deps = [
         "@glad//:glad",
-        "@nuklear//:nuklear"
+        "@nuklear//:nuklear",
+        "@json//:json",
+        "@platform_folders//:platform_folders",
     ] + select({
         "@platforms//os:macos": ["@glfw_macos//:glfw"],
         "//conditions:default": ["@glfw//:glfw"],
