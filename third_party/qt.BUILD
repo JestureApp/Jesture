@@ -59,7 +59,7 @@ QT_LIBRARIES = [
         hdrs = glob(["%s/**" % include_folder], allow_empty = True),
         includes = ["."],
         linkopts = ["-F/usr/local/opt/qt5/lib"] + [
-            "-framework %s" % library_name.replace("5", "") # macOS qt libs do not contain a 5 - e.g. instead of Qt5Core the lib is called QtCore
+            "-framework %s" % library_name.replace("6", "") # macOS qt libs do not contain a 5 - e.g. instead of Qt5Core the lib is called QtCore
             ],
         # Available from Bazel 4.0.0
         # target_compatible_with = ["@platforms//os:osx"],
