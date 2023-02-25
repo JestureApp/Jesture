@@ -6,6 +6,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@local_config_qt//:local_qt.bzl", "local_qt_base_path")
 load("@jesturepipe//:setup0.bzl", "jesturepipe_setup0")
 
+# buildifier: disable=unnamed-macros
 def jesture_setup1():
     """
     Setup for a workspace dependent on JesturePipe
@@ -16,6 +17,10 @@ def jesture_setup1():
         name = "qt",
         build_file = "@jesture//third_party:qt.BUILD",
         path = local_qt_base_path(),
+    )
+
+    native.register_toolchains(
+        "@qt//:qt_local_toolchain",
     )
 
     jesturepipe_setup0()
