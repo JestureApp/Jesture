@@ -2,7 +2,7 @@
 Dependency management 
 """
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
@@ -23,5 +23,7 @@ def jesture_repositories():
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        tag = "v0.1.1",
+        commit = "9f6052957a9530418d1542b81cc314de4c0ad58f",
+        # shallow_since = "1677290156 -0700",
+        # tag = "v0.1.1",
     )

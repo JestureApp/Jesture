@@ -34,3 +34,7 @@ jesture_setup0()
 load("//:setup1.bzl", "jesture_setup1")
 
 jesture_setup1()
+
+load("//:setup2.bzl", "jesture_setup2")
+
+jesture_setup2()
