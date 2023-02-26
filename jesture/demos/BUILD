@@ -1,1 +1,15 @@
+load("//qt:qt.bzl", "qt_cc_binary")
+
 package(default_visibility = ["//visibility:public"])
+
+qt_cc_binary(
+    name = "frame_view_demo",
+    srcs = ["frame_view_demo.cc"],
+    deps = [
+        "//jesture/jesturepipe:controller",
+        "//jesture/jesturepipe:settings",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@qt//:qt_core",
+        "@qt//:qt_widgets",
+    ],
+)

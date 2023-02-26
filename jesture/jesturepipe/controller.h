@@ -2,14 +2,13 @@
 #define JESTURE_JESTUREPIPE_CONTROLLER_H
 
 #include <QObject>
-// #include <QtGui/QImage>
-#include <QImage>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "jesture/jesturepipe/settings.h"
 #include "jesturepipe/graphs/jesturepipe/jesturepipe.h"
 #include "mediapipe/framework/calculator_framework.h"
+#include "mediapipe/framework/port/opencv_core_inc.h"
 
 namespace jesture {
 class JesturePipeController : public QObject {
@@ -33,7 +32,7 @@ class JesturePipeController : public QObject {
     absl::Status Stop() noexcept;
 
    signals:
-    void frameReady(QImage frame);
+    void frameReady(cv::Mat frame);
 
    private:
     absl::Status onFrame(mediapipe::Packet frame_packet) noexcept;

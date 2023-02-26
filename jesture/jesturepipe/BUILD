@@ -14,28 +14,10 @@ qt_cc_library(
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/formats:image_frame",
         "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
-        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
+        "@mediapipe//mediapipe/framework/port:opencv_core",
         "@qt//:qt_core",
-        "@qt//:qt_gui",
     ],
 )
-
-# qt_cc_library(
-#     name = "worker",
-#     srcs = ["worker.cc"],
-#     moc_hdrs = ["worker.h"],
-#     deps = [
-#         ":settings",
-#         "@com_google_absl//absl/status",
-#         "@com_google_absl//absl/status:statusor",
-#         "@jesturepipe//jesturepipe/graphs/jesturepipe",
-#         "@mediapipe//mediapipe/framework:calculator_framework",
-#         "@mediapipe//mediapipe/framework/formats:image_frame",
-#         "@mediapipe//mediapipe/framework/formats:image_frame_opencv",
-#         "@mediapipe//mediapipe/framework/port:opencv_imgproc",
-#         "@qt//:qt_core",
-#     ],
-# )
 
 cc_library(
     name = "settings",

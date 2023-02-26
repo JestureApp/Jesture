@@ -1,5 +1,7 @@
 #include "jesture/jesturepipe/controller.h"
 
+#include <QDebug>
+
 #include "mediapipe/framework/formats/image_frame_opencv.h"
 #include "mediapipe/framework/port/opencv_imgproc_inc.h"
 
@@ -33,19 +35,36 @@ absl::Status JesturePipeController::Start(
     JesturePipeSettings settings) noexcept {
     if (running) return absl::OkStatus();
 
-    const std::map<std::string, mediapipe::Packet> side_packets = {
-        {"camera_index", mediapipe::MakePacket<int>(settings.camera_index)
-                             .At(mediapipe::Timestamp(0))},
-        {"mode",
-         mediapipe::MakePacket<int>(settings.mode).At(mediapipe::Timestamp(0))},
-        {"num_hands", mediapipe::MakePacket<int>(settings.num_hands)
-                          .At(mediapipe::Timestamp(0))}};
+    // const std::map<std::string, mediapipe::Packet> side_packets = {
+    //     {"camera_index", mediapipe::MakePacket<int>(settings.camera_index)},
+    //     {"mode", mediapipe::MakePacket<int>(settings.mode)},
+    //     {"num_hands", mediapipe::MakePacket<int>(settings.num_hands)}};
+    // const std::map<std::string, mediapipe::Packet> side_packets = {
+    //     {"camera_index", mediapipe::MakePacket<int>(settings.camera_index)
+    //                          .At(mediapipe::Timestamp(0))},
+    //     {"mode",
+    //      mediapipe::MakePacket<int>(settings.mode).At(mediapipe::Timestamp(0))},
+    //     {"num_hands", mediapipe::MakePacket<int>(settings.num_hands)
+    //                       .At(mediapipe::Timestamp(0))}};
 
-    MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
+    const std::map<std::string, mediapipe::Packet> side_packets{
+        // {"palm_model_path",
+        // mediapipe::MakePacket<std::string>(palm_model_path)
+        //                         .At(mediapipe::Timestamp(0))},
+        // {"landmark_model_path",
+        //  mediapipe::MakePacket<std::string>(hand_model_path)
+        //      .At(mediapipe::Timestamp(0))},
+        {"camera_index",
+         mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
+        {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
+        {"num_hands",
+         mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
 
     MP_RETURN_IF_ERROR(graph.ObserveOutputStream(
         OutputFrameStream,
         std::bind(&JesturePipeController::onFrame, this, _1)));
+
+    MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
 
     running = true;
 
@@ -69,14 +88,14 @@ absl::Status JesturePipeController::onFrame(
     // CHECKME: Image manipulation is expensive. Maybe there is a way to check
     // if anyone is listening to the `frameReady` slot.
 
+    qDebug() << "Got new frame from JesturePipe at "
+             << frame_packet.Timestamp().Value();
+
     auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
 
     cv::Mat mat = mediapipe::formats::MatView(&output_frame);
 
-    QImage img =
-        QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
-
-    emit frameReady(img);
+    emit frameReady(mat);
 
     return absl::OkStatus();
 }
