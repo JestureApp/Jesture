@@ -1,37 +1,45 @@
 #ifndef JESTURE_JESTUREPIPE_CONTROLLER_H
 #define JESTURE_JESTUREPIPE_CONTROLLER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QThread>
+#include <QObject>
+// #include <QtGui/QImage>
+#include <QImage>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "jesture/jesturepipe/worker.h"
-#include "mediapipe/framework/port/opencv_imgproc_inc.h"
+#include "jesture/jesturepipe/settings.h"
+#include "jesturepipe/graphs/jesturepipe/jesturepipe.h"
+#include "mediapipe/framework/calculator_framework.h"
 
 namespace jesture {
 class JesturePipeController : public QObject {
     Q_OBJECT
+
+    // Q_DISABLE_COPY(JesturePipeController)
+
+    // CHECKME: Not sure I need to disable move, but better safe than sorry for
+    // now.
+    Q_DISABLE_COPY_MOVE(JesturePipeController)
    public:
-    static absl::StatusOr<JesturePipeController> Create(
-        JesturePipeInit init) noexcept;
+    static absl::StatusOr<JesturePipeController *> Create(
+        JesturePipeInit init, QObject *parent = nullptr) noexcept;
 
-    JesturePipeController(JesturePipeController &other) = delete;
-    JesturePipeController &operator=(JesturePipeWorker &other) = delete;
-
-    JesturePipeController(JesturePipeController &&other) = delete;
-    JesturePipeController &operator=(JesturePipeController &&other) = delete;
+    explicit JesturePipeController(QObject *parent = nullptr) noexcept;
 
     ~JesturePipeController() noexcept;
 
    public slots:
     absl::Status Start(JesturePipeSettings settings) noexcept;
-    void Stop() noexcept;
-    void forwardFrame(cv::Mat frame) noexcept;
+    absl::Status Stop() noexcept;
+
+   signals:
+    void frameReady(QImage frame);
 
    private:
-    JesturePipeController(JesturePipeWorker *worker) noexcept;
-    QThread workerThread;
+    absl::Status onFrame(mediapipe::Packet frame_packet) noexcept;
+
+    bool running;
+    mediapipe::CalculatorGraph graph;
 };
 }  // namespace jesture
 
