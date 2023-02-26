@@ -23,7 +23,7 @@ def jesture_repositories():
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "9f6052957a9530418d1542b81cc314de4c0ad58f",
+        commit = "51532f7214dc31156e284f5c95e8ffdf3253e7e5",
         # shallow_since = "1677290156 -0700",
         # tag = "v0.1.1",
     )
