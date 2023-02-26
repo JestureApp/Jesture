@@ -39,6 +39,7 @@ def qt_module(name, include_dir, lib = None, deps = []):
         includes = [
             local_qt_include_path(),
             paths.join(local_qt_include_path(), "QtCore"),
+            paths.join(local_qt_include_path(), include_dir),
         ],
         # CHECKME: might need to link icu (International Components for Unicode)
         linkopts = [] + extra_linkopts,
