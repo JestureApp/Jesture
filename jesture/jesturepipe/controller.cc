@@ -88,8 +88,8 @@ absl::Status JesturePipeController::onFrame(
     // CHECKME: Image manipulation is expensive. Maybe there is a way to check
     // if anyone is listening to the `frameReady` slot.
 
-    qDebug() << "Got new frame from JesturePipe at "
-             << frame_packet.Timestamp().Value();
+    // qDebug() << "Got new frame from JesturePipe at "
+    //          << frame_packet.Timestamp().Value();
 
     auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
 

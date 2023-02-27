@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <iostream>
 
+#include "jesture/components/frame_view.h"
 #include "jesture/jesturepipe/controller.h"
 #include "jesture/jesturepipe/settings.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -13,33 +14,9 @@ using namespace jesture;
 class MainWindow : public QMainWindow {
    public:
     MainWindow() noexcept {
-        QLabel *label = new QLabel(this);
-        label->setText(QT_VERSION_STR);
+        frame_view = new FrameView(this);
 
-        // auto maybe_controller = JesturePipeController::Create(init);
-
-        // if (!maybe_controller.ok()) {
-        //     qInfo() << QString::fromStdString(
-        //         maybe_controller.status().ToString());
-        //     throw std::exception();
-        // }
-
-        // absl::Status status = absl::OkStatus();
-
-        // controller = maybe_controller.value();
-
-        // JesturePipeSettings settings{
-        //     .camera_index = 0,
-        //     .mode = 1,
-        //     .num_hands = 2,
-        // };
-
-        // // status.Update(controller->Start(settings));
-
-        // if (!status.ok()) {
-        //     qInfo() << QString::fromStdString(status.ToString());
-        //     throw std::exception();
-        // }
+        setCentralWidget(frame_view);
 
         setWindowTitle("Hello World");
     }
@@ -52,6 +29,9 @@ class MainWindow : public QMainWindow {
         absl::Status status = absl::OkStatus();
 
         controller = maybe_controller.value();
+
+        QObject::connect(controller, &JesturePipeController::frameReady,
+                         frame_view, &FrameView::setFrame);
 
         JesturePipeSettings settings{
             .camera_index = 0,
@@ -76,6 +56,7 @@ class MainWindow : public QMainWindow {
 
    private:
     JesturePipeController *controller;
+    FrameView *frame_view;
 };
 
 using bazel::tools::cpp::runfiles::Runfiles;
