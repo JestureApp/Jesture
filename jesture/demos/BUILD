@@ -2,6 +2,8 @@ load("//qt:qt.bzl", "qt_cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["Info.plist"])
+
 qt_cc_binary(
     name = "frame_view_demo",
     srcs = ["frame_view_demo.cc"],
@@ -12,4 +14,5 @@ qt_cc_binary(
         "@qt//:qt_core",
         "@qt//:qt_widgets",
     ],
+    data = [":Info.plist"]
 )
