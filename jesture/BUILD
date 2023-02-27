@@ -3,6 +3,15 @@ package(default_visibility = ["//visibility:public"])
 load("//qt:qt.bzl", "qt_cc_library")
 
 qt_cc_library(
+    name = "config_manager",
+    moc_hdrs = ["config_manager.h"],
+    srcs = ["config_manager.cc"],
+    deps = [
+        "@qt//:qt_core"
+    ]
+)
+
+qt_cc_library(
     name = "main_window",
     moc_hdrs = ["main_window.h"],
     srcs = ["main_window.cc"],
@@ -27,7 +36,8 @@ cc_binary(
     deps = [
         "@qt//:qt_core",
         "@qt//:qt_widgets",
-        ":main_window"
+        ":main_window",
+        ":config_manager"
     ],
     data = [
         "//icons:settings.svg"

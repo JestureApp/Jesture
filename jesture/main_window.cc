@@ -10,6 +10,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QListWidget>
 #include <QtGui/QAction>
 #include <QtGui/QIcon>
 #include <QtMultimedia/QCamera>
@@ -85,6 +86,12 @@ void MainWindow::setup_settings() {
     // Top level styles
     settings->setStyleSheet("font-size: 20pt");
     
+    // Create back button
+    auto back_button = new QPushButton("Back", settings);
+    layout->addRow(back_button);
+    connect(back_button, &QPushButton::released, this, &MainWindow::close_settings);
+    
+    // Create title
     auto title = new QLabel("Settings", settings);
     title->setStyleSheet("font-weight: bold; font-size: 24pt");
     layout->addRow(title);
@@ -113,7 +120,25 @@ void MainWindow::setup_settings() {
 }
 
 void MainWindow::setup_inspector() {
+    // Create menu and add to interactive menus parent
+    inspector = new QWidget(interactives);
+    interactives_layout->addWidget(inspector);
     
+    // Create layout
+    auto layout = new QFormLayout();
+    inspector->setLayout(layout);
+    
+    // Create back button
+    auto back_button = new QPushButton("Back", inspector);
+    layout->addRow(back_button);
+    connect(back_button, &QPushButton::released, this, &MainWindow::close_inspector);
+    
+    // Create title
+    auto title = new QLabel("Gestures", inspector);
+    title->setStyleSheet("font-weight: bold; font-size: 24pt");
+    layout->addRow(title);
+    
+    auto gesture_list = new QListWidget(inspector);
 }
 
 void MainWindow::setup_system_tray() {

@@ -1,5 +1,5 @@
-#ifndef JESTURE_VIEWS_MAIN_WINDOW_H
-#define JESTURE_VIEWS_MAIN_WINDOW_H
+#ifndef JESTURE_MAIN_WINDOW_H
+#define JESTURE_MAIN_WINDOW_H
 
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QWidget>

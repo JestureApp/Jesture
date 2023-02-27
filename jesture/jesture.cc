@@ -1,6 +1,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QSystemTrayIcon>
 #include "main_window.h"
+#include "config_manager.h"
 
 /*
         Notes
@@ -22,17 +23,14 @@ int main(int argc, char **argv) {
     
     QApplication app(argc, argv);
     app.setApplicationName("Jesture");
-    app.setOrganizationDomain("jesture");
-    app.setOrganizationName("jesture");
     
     auto app_icon = new QIcon("icons/settings.svg");
     app.setWindowIcon(*app_icon);
-
-    if (!QSystemTrayIcon::isSystemTrayAvailable()) {
-        printf("Warning! No system tray!\n");
-    }
-
-    MainWindow *window = new MainWindow();
+    
+    auto config_manager = new ConfigManager();
+    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager, &ConfigManager::save);
+    
+    auto window = new MainWindow();
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
     window->resize(1280, 720);
     window->show();
