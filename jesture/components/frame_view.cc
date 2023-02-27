@@ -23,8 +23,6 @@ void FrameView::setFrame(cv::Mat frame) {
 
     int w = frame.cols / 3, h = frame.rows / 3;
 
-    qDebug() << "Got new frame with width:" << w << "and height:" << h;
-
     if (img.size() != QSize{w, h}) img = QImage(w, h, QImage::Format_RGB888);
 
     cv::Mat mat(h, w, CV_8UC3, img.bits(), img.bytesPerLine());
