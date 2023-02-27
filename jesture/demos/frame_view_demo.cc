@@ -13,22 +13,11 @@ using namespace jesture;
 
 class MainWindow : public QMainWindow {
    public:
-    MainWindow() noexcept {
-        frame_view = new FrameView(this);
+    MainWindow(JesturePipeInit init) noexcept {
+        FrameView *frame_view = new FrameView(this);
+        controller = new JesturePipeController(init, this);
 
         setCentralWidget(frame_view);
-
-        setWindowTitle("Hello World");
-    }
-
-    absl::Status init(JesturePipeInit init) noexcept {
-        auto maybe_controller = JesturePipeController::Create(init, this);
-
-        if (!maybe_controller.ok()) return maybe_controller.status();
-
-        absl::Status status = absl::OkStatus();
-
-        controller = maybe_controller.value();
 
         QObject::connect(controller, &JesturePipeController::frameReady,
                          frame_view, &FrameView::setFrame);
@@ -39,24 +28,17 @@ class MainWindow : public QMainWindow {
             .num_hands = 2,
         };
 
-        status.Update(controller->Start(settings));
+        controller->Start(settings);
 
-        return status;
+        setWindowTitle("Hello World");
     }
 
     void closeEvent(QCloseEvent *event) {
-        absl::Status status = absl::OkStatus();
-
-        if (controller) status.Update(controller->Stop());
-
-        if (!status.ok()) {
-            qInfo() << QString::fromStdString(status.ToString());
-        }
+        if (controller) controller->Stop();
     }
 
    private:
     JesturePipeController *controller;
-    FrameView *frame_view;
 };
 
 using bazel::tools::cpp::runfiles::Runfiles;
@@ -112,14 +94,7 @@ int main(int argc, char **argv) {
     app.setApplicationName("Frame View Demo");
     app.setOrganizationName("jesture");
 
-    MainWindow main_win;
-
-    absl::Status status = main_win.init(init);
-
-    if (!status.ok()) {
-        std::cerr << status << std::endl;
-        app.exit(1);
-    }
+    MainWindow main_win(init);
 
     main_win.show();
 
