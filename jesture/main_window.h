@@ -5,12 +5,13 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QStackedLayout>
 #include <QtGui/QAction>
+#include "jesturepipe/controller.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-    MainWindow();
+    MainWindow(jesture::JesturePipeController* jesturepipe_controller);
 signals:
     void quit();
 private slots:

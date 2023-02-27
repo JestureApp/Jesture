@@ -19,7 +19,9 @@ qt_cc_library(
         "@qt//:qt_core",
         "@qt//:qt_widgets",
         "@qt//:qt_gui",
-        "@qt//:qt_multimedia"
+        "@qt//:qt_multimedia",
+        "//jesture/jesturepipe:controller",
+        "//jesture/components:frame_view"
     ],
     data = [
         "//icons:settings.svg",
@@ -37,7 +39,10 @@ cc_binary(
         "@qt//:qt_core",
         "@qt//:qt_widgets",
         ":main_window",
-        ":config_manager"
+        ":config_manager",
+        "//jesture/jesturepipe:controller",
+        "//jesture/jesturepipe:settings",
+        "@bazel_tools//tools/cpp/runfiles",
     ],
     data = [
         "//icons:settings.svg"

@@ -15,10 +15,13 @@
 #include <QtGui/QIcon>
 #include <QtMultimedia/QCamera>
 #include <QtMultimedia/QMediaDevices>
-
 #include "main_window.h"
+#include "jesture/jesturepipe/settings.h"
+#include "jesture/components/frame_view.h"
 
-MainWindow::MainWindow() {
+using namespace jesture;
+
+MainWindow::MainWindow(JesturePipeController* jesturepipe_controller) {
     // Create the parent widget
     auto content = new QWidget(this);
     auto content_layout = new QStackedLayout(content);
@@ -26,9 +29,10 @@ MainWindow::MainWindow() {
     content->setLayout(content_layout);
     setCentralWidget(content);
     
-    // Placeholder for camera feed
-    auto test_label = new QLabel("This is Jesture!", content);
-    content_layout->addWidget(test_label);
+    // Camera feed
+    auto frame_view = new FrameView(content);
+    content_layout->addWidget(frame_view);
+    connect(jesturepipe_controller, &JesturePipeController::frameReady, frame_view, &FrameView::setFrame);
     
     // Create a parent for all interactive menus
     interactives = new QWidget(content);
