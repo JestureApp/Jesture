@@ -76,10 +76,15 @@ int main(int argc, char **argv) {
     JesturePipeSettings settings{
         .camera_index = 0,
         .mode = 1,
-        .num_hands = 2,
     };
 
     jesturepipe_controller->Start(settings);
+
+    jesturepipe::Gesture testGesture;
+
+    testGesture.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
+
+    jesturepipe_controller->addGesture(testGesture);
 
     auto window = new MainWindow(jesturepipe_controller);
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);

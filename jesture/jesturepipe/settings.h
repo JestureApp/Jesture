@@ -7,7 +7,6 @@ namespace jesture {
 typedef struct {
     int camera_index;
     int mode;
-    int num_hands;
 } JesturePipeSettings;
 
 typedef struct {

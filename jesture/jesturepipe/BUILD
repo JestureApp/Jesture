@@ -10,6 +10,7 @@ qt_cc_library(
         ":settings",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
+        "@jesturepipe//jesturepipe/gesture",
         "@jesturepipe//jesturepipe/graphs/jesturepipe",
         "@mediapipe//mediapipe/framework:calculator_framework",
         "@mediapipe//mediapipe/framework/formats:image_frame",

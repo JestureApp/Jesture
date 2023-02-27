@@ -6,6 +6,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "jesture/jesturepipe/settings.h"
+#include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/graphs/jesturepipe/jesturepipe.h"
 #include "mediapipe/framework/calculator_framework.h"
 #include "mediapipe/framework/port/opencv_core_inc.h"
@@ -28,6 +29,7 @@ class JesturePipeController : public QObject {
    public slots:
     void Start(JesturePipeSettings settings) noexcept;
     void updateSettings(JesturePipeSettings settings) noexcept;
+    void addGesture(jesturepipe::Gesture gesture) noexcept;
     void Stop() noexcept;
 
    signals:
