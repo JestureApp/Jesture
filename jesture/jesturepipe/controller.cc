@@ -11,76 +11,52 @@ using namespace std::placeholders;
 const char OutputFrameStream[] = "annotated_frame";
 }  // namespace
 
-JesturePipeController::JesturePipeController(QObject *parent) noexcept
-    : QObject(parent), running(false) {}
-
-JesturePipeController::~JesturePipeController() noexcept {
-    // TODO: should probably log this error.
-    Stop().IgnoreError();
+JesturePipeController::JesturePipeController(JesturePipeInit init,
+                                             QObject *parent) noexcept
+    : QObject(parent), running(false) {
+    Q_ASSERT(jesturepipe::jesturepipe_graph(
+                 &graph, init.palm_model_full_path, init.palm_model_lite_path,
+                 init.landmark_model_full_path, init.landmark_model_lite_path)
+                 .ok());
 }
 
-absl::StatusOr<JesturePipeController *> JesturePipeController::Create(
-    JesturePipeInit init, QObject *parent) noexcept {
-    JesturePipeController *controller = new JesturePipeController(parent);
+JesturePipeController::~JesturePipeController() noexcept { Stop(); }
 
-    MP_RETURN_IF_ERROR(jesturepipe::jesturepipe_graph(
-        &controller->graph, init.palm_model_full_path,
-        init.palm_model_lite_path, init.landmark_model_full_path,
-        init.landmark_model_lite_path));
-
-    return controller;
-}
-
-absl::Status JesturePipeController::Start(
-    JesturePipeSettings settings) noexcept {
-    if (running) return absl::OkStatus();
-
-    // const std::map<std::string, mediapipe::Packet> side_packets = {
-    //     {"camera_index", mediapipe::MakePacket<int>(settings.camera_index)},
-    //     {"mode", mediapipe::MakePacket<int>(settings.mode)},
-    //     {"num_hands", mediapipe::MakePacket<int>(settings.num_hands)}};
-    // const std::map<std::string, mediapipe::Packet> side_packets = {
-    //     {"camera_index", mediapipe::MakePacket<int>(settings.camera_index)
-    //                          .At(mediapipe::Timestamp(0))},
-    //     {"mode",
-    //      mediapipe::MakePacket<int>(settings.mode).At(mediapipe::Timestamp(0))},
-    //     {"num_hands", mediapipe::MakePacket<int>(settings.num_hands)
-    //                       .At(mediapipe::Timestamp(0))}};
+void JesturePipeController::Start(JesturePipeSettings settings) noexcept {
+    if (running) return;
 
     const std::map<std::string, mediapipe::Packet> side_packets{
-        // {"palm_model_path",
-        // mediapipe::MakePacket<std::string>(palm_model_path)
-        //                         .At(mediapipe::Timestamp(0))},
-        // {"landmark_model_path",
-        //  mediapipe::MakePacket<std::string>(hand_model_path)
-        //      .At(mediapipe::Timestamp(0))},
         {"camera_index",
          mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
         {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))},
         {"num_hands",
          mediapipe::MakePacket<int>(2).At(mediapipe::Timestamp(0))}};
 
-    MP_RETURN_IF_ERROR(graph.ObserveOutputStream(
-        OutputFrameStream,
-        std::bind(&JesturePipeController::onFrame, this, _1)));
+    Q_ASSERT(graph
+                 .ObserveOutputStream(
+                     OutputFrameStream,
+                     std::bind(&JesturePipeController::onFrame, this, _1))
+                 .ok());
 
-    MP_RETURN_IF_ERROR(graph.StartRun(side_packets));
+    Q_ASSERT(graph.StartRun(side_packets).ok());
 
     running = true;
-
-    return absl::OkStatus();
 }
 
-absl::Status JesturePipeController::Stop() noexcept {
-    if (!running) return absl::OkStatus();
+void JesturePipeController::Stop() noexcept {
+    if (!running) return;
 
-    MP_RETURN_IF_ERROR(graph.CloseAllPacketSources());
+    Q_ASSERT(graph.CloseAllPacketSources().ok());
 
-    MP_RETURN_IF_ERROR(graph.WaitUntilDone());
+    Q_ASSERT(graph.WaitUntilDone().ok());
 
     running = false;
+}
 
-    return absl::OkStatus();
+void JesturePipeController::updateSettings(
+    JesturePipeSettings settings) noexcept {
+    Stop();
+    Start(settings);
 }
 
 absl::Status JesturePipeController::onFrame(

@@ -20,16 +20,15 @@ class JesturePipeController : public QObject {
     // now.
     Q_DISABLE_COPY_MOVE(JesturePipeController)
    public:
-    static absl::StatusOr<JesturePipeController *> Create(
-        JesturePipeInit init, QObject *parent = nullptr) noexcept;
-
-    explicit JesturePipeController(QObject *parent = nullptr) noexcept;
+    explicit JesturePipeController(JesturePipeInit init,
+                                   QObject *parent = nullptr) noexcept;
 
     ~JesturePipeController() noexcept;
 
    public slots:
-    absl::Status Start(JesturePipeSettings settings) noexcept;
-    absl::Status Stop() noexcept;
+    void Start(JesturePipeSettings settings) noexcept;
+    void updateSettings(JesturePipeSettings settings) noexcept;
+    void Stop() noexcept;
 
    signals:
     void frameReady(cv::Mat frame);
