@@ -30,15 +30,22 @@ class JesturePipeController : public QObject {
     void Start(JesturePipeSettings settings) noexcept;
     void updateSettings(JesturePipeSettings settings) noexcept;
     void addGesture(jesturepipe::Gesture gesture) noexcept;
+    void toggleRecording() noexcept;
     void Stop() noexcept;
 
    signals:
     void frameReady(cv::Mat frame);
+    void gestureRecognizer(int gesture_id);
+    void gestureRecorded(jesturepipe::Gesture gesture);
 
    private:
     absl::Status onFrame(mediapipe::Packet frame_packet) noexcept;
+    absl::Status onGestureRecognized(mediapipe::Packet gesture_packet) noexcept;
+    absl::Status onGestureRecorded(mediapipe::Packet gesture_packet) noexcept;
 
     bool running;
+    bool recording;
+    int timestamp;
     mediapipe::CalculatorGraph graph;
 };
 }  // namespace jesture

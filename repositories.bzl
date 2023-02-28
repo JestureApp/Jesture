@@ -32,7 +32,13 @@ def jesture_repositories():
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "a30c4be4aeb785c232422cad4f3aceef8e824535",
+        commit = "c00af16c399eabc12331cff992aaa8593c460dc2",
         # shallow_since = "1677290156 -0700",
         # tag = "v0.1.1",
     )
+
+    # maybe(
+    #     native.local_repository,
+    #     name = "jesturepipe",
+    #     path = "../JesturePipe",
+    # )

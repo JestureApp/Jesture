@@ -4,6 +4,7 @@
 #include "config_manager.h"
 #include "jesture/jesturepipe/controller.h"
 #include "jesture/jesturepipe/settings.h"
+#include "jesturepipe/gesture/gesture.h"
 #include "main_window.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
@@ -67,9 +68,8 @@ int main(int argc, char **argv) {
 
     auto jesturepipe_controller =
         new JesturePipeController(getInit(runfiles), &app);
-    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit,
-                                    jesturepipe_controller,
-                                    &JesturePipeController::Stop);
+    QObject::connect(&app, &QApplication::aboutToQuit, jesturepipe_controller,
+                     &JesturePipeController::Stop);
 
     delete runfiles;
 
@@ -80,9 +80,9 @@ int main(int argc, char **argv) {
 
     jesturepipe_controller->Start(settings);
 
-    jesturepipe::Gesture testGesture;
+    jesturepipe::Gesture testGesture(0);
 
-    testGesture.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
+    testGesture.frames.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
 
     jesturepipe_controller->addGesture(testGesture);
 
@@ -90,6 +90,17 @@ int main(int argc, char **argv) {
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
     window->resize(1280, 720);
     window->show();
+
+    QObject::connect(
+        jesturepipe_controller, &JesturePipeController::gestureRecognizer,
+        [](int id) { qInfo() << "recognized gesture with id" << id; });
+
+    QObject::connect(jesturepipe_controller,
+                     &JesturePipeController::gestureRecorded,
+                     [](jesturepipe::Gesture gesture) {
+                         qInfo() << "Got recorded gesture with"
+                                 << gesture.frames.size() << "frames";
+                     });
 
     return app.exec();
 }

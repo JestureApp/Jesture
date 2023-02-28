@@ -13,3 +13,17 @@ qt_cc_library(
         "@qt//:qt_widgets",
     ],
 )
+
+qt_cc_library(
+    name = "gesture_editor",
+    srcs = ["gesture_editor.cc"],
+    moc_hdrs = ["gesture_editor.h"],
+    deps = [
+        ":frame_view",
+        "//jesture/jesturepipe:controller",
+        "@mediapipe//mediapipe/framework/port:opencv_core",
+        "@mediapipe//mediapipe/framework/port:opencv_imgproc",
+        "@qt//:qt_gui",
+        "@qt//:qt_widgets",
+    ],
+)
