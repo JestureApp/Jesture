@@ -6,12 +6,13 @@
 #include <QtWidgets/QStackedLayout>
 #include <QtGui/QAction>
 #include "jesturepipe/controller.h"
+#include "jesture/components/frame_view.h"
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 public:
-    MainWindow(jesture::JesturePipeController* jesturepipe_controller);
+    MainWindow(jesture::JesturePipeController* jesturepipe_controller, QWidget* parent = 0);
 signals:
     void quit();
 private slots:
@@ -21,17 +22,22 @@ private slots:
     void close_inspector();
     void inspect_gesture(int index);
     
-    void hide_from_tray();
-    void show_from_tray();
-    void quit_from_tray();
+    void hide_window();
+    void show_window();
+    void quit_app();
 private:
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    
     void setup_general();
     void setup_settings();
     void setup_inspector();
     void setup_system_tray();
+    void setup_stylesheet();
     
     QWidget* interactives;
     QStackedLayout* interactives_layout;
+    jesture::FrameView* camera_feed;
     QWidget* general;
     QWidget* settings;
     QWidget* inspector;
@@ -39,9 +45,9 @@ private:
     QAction* hide_action;
     QAction* show_action;
     QAction* quit_action;
-/*protected:
-    void closeEvent(QCloseEvent *event) override;
-*/
+    
+    int mouse_x;
+    int mouse_y;
 };
 
 #endif

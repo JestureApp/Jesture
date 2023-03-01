@@ -88,19 +88,19 @@ int main(int argc, char **argv) {
 
     auto window = new MainWindow(jesturepipe_controller);
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
-    window->resize(1280, 720);
+    window->setFixedSize(1280, 720);
     window->show();
 
     QObject::connect(
         jesturepipe_controller, &JesturePipeController::gestureRecognizer,
         [](int id) { qInfo() << "recognized gesture with id" << id; });
 
-    QObject::connect(jesturepipe_controller,
+    /*QObject::connect(jesturepipe_controller,
                      &JesturePipeController::gestureRecorded,
                      [](jesturepipe::Gesture gesture) {
                          qInfo() << "Got recorded gesture with"
                                  << gesture.frames.size() << "frames";
-                     });
+                     });*/
 
     return app.exec();
 }

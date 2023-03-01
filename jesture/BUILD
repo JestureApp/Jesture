@@ -20,6 +20,8 @@ qt_cc_library(
         "//icons:quit.svg",
         "//icons:settings.svg",
         "//icons:show.svg",
+        "//icons:cross.svg",
+        "//icons:left_arrow.svg"
     ],
     moc_hdrs = ["main_window.h"],
     deps = [

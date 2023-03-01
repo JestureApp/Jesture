@@ -3,5 +3,7 @@ exports_files([
     "show.svg",
     "hide.svg",
     "quit.svg",
-    "add_element.svg"
+    "add_element.svg",
+    "cross.svg",
+    "left_arrow.svg"
 ])
