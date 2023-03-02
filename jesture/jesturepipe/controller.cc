@@ -43,8 +43,8 @@ void JesturePipeController::Start(JesturePipeSettings settings) noexcept {
 
     const std::map<std::string, mediapipe::Packet> side_packets{
         {"camera_index",
-         mediapipe::MakePacket<int>(0).At(mediapipe::Timestamp(0))},
-        {"mode", mediapipe::MakePacket<int>(1).At(mediapipe::Timestamp(0))}};
+         mediapipe::MakePacket<int>(settings.camera_index).At(mediapipe::Timestamp(0))},
+        {"mode", mediapipe::MakePacket<int>(settings.mode).At(mediapipe::Timestamp(0))}};
 
     check_status(graph.ObserveOutputStream(
         OutputFrameStream,

@@ -8,21 +8,6 @@
 #include "main_window.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
-/*
-Notes
-QScrollArea* scroll_area = new QScrollArea;
-scroll_area->setFrameShape(QFrame::NoFrame);
-scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-scroll_area->verticalScrollBar()->setStyleSheet("QScrollBar:vertical
-{width: 20px;}"); scroll_area->setWidget(content);
-
-QVBoxLayout* scroll_area_layout = new QVBoxLayout;
-scroll_area_layout->setContentsMargins(0, 0, 0, 0);
-scroll_area_layout->addWidget(scroll_area);
-
-setLayout(scroll_area_layout);
-*/
-
 using bazel::tools::cpp::runfiles::Runfiles;
 using namespace jesture;
 
@@ -46,61 +31,61 @@ JesturePipeInit getInit(Runfiles *runfiles) {
 }
 
 int main(int argc, char **argv) {
+    // Mediapipe/Jesturepipe logging
     google::InitGoogleLogging(argv[0]);
 
+    // Create app
     QApplication app(argc, argv);
     app.setApplicationName("Jesture");
 
+    // Set app icon
     auto app_icon = new QIcon("icons/settings.svg");
     app.setWindowIcon(*app_icon);
 
-    auto config_manager = new ConfigManager();
-    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager,
-                            &ConfigManager::save);
-
+    // Setup runfiles for JesturePipe tflite files
     std::string error;
-    Runfiles *runfiles = Runfiles::Create(argv[0], &error);
-
+    auto runfiles = Runfiles::Create(argv[0], &error);
     if (runfiles == nullptr) {
         std::cout << "Error: " << error << std::endl;
         return 1;
     }
-
-    auto jesturepipe_controller =
-        new JesturePipeController(getInit(runfiles), &app);
-    QObject::connect(&app, &QApplication::aboutToQuit, jesturepipe_controller,
-                     &JesturePipeController::Stop);
-
+    
+    // Create app components
+    auto config_manager = new ConfigManager();
+    auto jesturepipe_controller = new JesturePipeController(getInit(runfiles), &app);
+    auto window = new MainWindow(config_manager->get_settings(), config_manager->get_gestures());
+    
+    // Clear runfiles memory
     delete runfiles;
-
-    JesturePipeSettings settings{
-        .camera_index = 0,
-        .mode = 1,
-    };
-
-    jesturepipe_controller->Start(settings);
-
-    jesturepipe::Gesture testGesture(0);
-
-    testGesture.frames.push_back(jesturepipe::GestureFrame(90, 90, 90, 90, 90));
-
-    jesturepipe_controller->addGesture(testGesture);
-
-    auto window = new MainWindow(jesturepipe_controller);
+    
+    // Qt Signal-Slot Connections
+    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit, jesturepipe_controller, &JesturePipeController::Stop);
+    jesturepipe_controller->connect(jesturepipe_controller, &JesturePipeController::gestureRecorded, jesturepipe_controller, &JesturePipeController::addGesture);
+    jesturepipe_controller->connect(jesturepipe_controller, &JesturePipeController::gestureRecorded, window, &MainWindow::add_gesture);
+    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager, &ConfigManager::save);
+    config_manager->connect(config_manager, &ConfigManager::settings_to_controller, jesturepipe_controller, &JesturePipeController::updateSettings);
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
+    window->connect(window, &MainWindow::toggle_recording, jesturepipe_controller, &JesturePipeController::toggleRecording);
+    window->connect(jesturepipe_controller, &JesturePipeController::frameReady, window, &MainWindow::new_camera_frame);
+    window->connect(window, &MainWindow::update_camera_setting, config_manager, &ConfigManager::update_camera_setting);
+    
+    // Initialize app components
+    jesturepipe_controller->Start(config_manager->get_settings());
+    for (auto gesture : config_manager->get_gestures())
+        jesturepipe_controller->addGesture(gesture);
     window->setFixedSize(1280, 720);
     window->show();
 
+    // Debug logging to detect gestures emitted
     QObject::connect(
         jesturepipe_controller, &JesturePipeController::gestureRecognizer,
         [](int id) { qInfo() << "recognized gesture with id" << id; });
-
-    /*QObject::connect(jesturepipe_controller,
+    QObject::connect(jesturepipe_controller,
                      &JesturePipeController::gestureRecorded,
                      [](jesturepipe::Gesture gesture) {
                          qInfo() << "Got recorded gesture with"
                                  << gesture.frames.size() << "frames";
-                     });*/
+                     });
 
     return app.exec();
 }

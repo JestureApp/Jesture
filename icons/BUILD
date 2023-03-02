@@ -5,5 +5,6 @@ exports_files([
     "quit.svg",
     "add_element.svg",
     "cross.svg",
-    "left_arrow.svg"
+    "left_arrow.svg",
+    "add.svg"
 ])

@@ -1,5 +1,6 @@
 #include "main_window.h"
 
+#include <vector>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtGui/QAction>
@@ -23,11 +24,15 @@
 #include "jesture/components/frame_view.h"
 #include "jesture/components/gesture_editor.h"
 #include "jesture/jesturepipe/settings.h"
+#include "jesturepipe/gesture/gesture.h"
 
 using namespace jesture;
 
-MainWindow::MainWindow(JesturePipeController* jesturepipe_controller, QWidget* parent) :
-    QMainWindow(parent, Qt::Window | Qt::FramelessWindowHint) {
+MainWindow::MainWindow(
+    JesturePipeSettings initial_settings,
+    std::vector<jesturepipe::Gesture> initial_gestures,
+    QWidget* parent
+) : QMainWindow(parent, Qt::Window | Qt::FramelessWindowHint) {
     // Create the parent widget
     auto content = new QWidget(this);
     auto content_layout = new QStackedLayout(content);
@@ -35,16 +40,22 @@ MainWindow::MainWindow(JesturePipeController* jesturepipe_controller, QWidget* p
     content->setLayout(content_layout);
     setCentralWidget(content);
 
+    // Recording overlay
+    recording_overlay = new QWidget(this);
+    recording_overlay->setObjectName("recording");
+    content_layout->addWidget(recording_overlay);
+    recording_overlay->hide();
+    
     // Camera feed
     camera_feed = new FrameView(content);
     content_layout->addWidget(camera_feed);
     connect(
-        jesturepipe_controller,
-        &JesturePipeController::frameReady,
+        this,
+        &MainWindow::new_camera_frame,
         camera_feed,
         &FrameView::setFrame
     );
-
+    
     // Create a parent for all interactive menus
     interactives = new QWidget(content);
     interactives_layout = new QStackedLayout(interactives);
@@ -54,8 +65,8 @@ MainWindow::MainWindow(JesturePipeController* jesturepipe_controller, QWidget* p
 
     // Setup menus
     setup_general();
-    setup_settings();
-    setup_inspector();
+    setup_settings(initial_settings);
+    setup_inspector(initial_gestures);
 
     // Check if platform supports the system tray
     if (QSystemTrayIcon::isSystemTrayAvailable()) setup_system_tray();
@@ -69,6 +80,10 @@ MainWindow::MainWindow(JesturePipeController* jesturepipe_controller, QWidget* p
     
     setWindowTitle("Jesture");
     setup_stylesheet();
+}
+
+void MainWindow::add_gesture(jesturepipe::Gesture gesture) {
+    gesture_list->addItem(new QListWidgetItem("New Gesture", gesture_list));
 }
 
 void MainWindow::setup_general() {
@@ -86,35 +101,48 @@ void MainWindow::setup_general() {
     auto hide_icon = new QIcon("icons/hide.svg");
     auto settings_icon = new QIcon("icons/settings.svg");
     auto inspector_icon = new QIcon("icons/add_element.svg");
+    auto add_icon = new QIcon("icons/add.svg");
 
     // Create buttons
     auto quit_button = new QPushButton(*cross_icon, "", general);
     auto hide_button = new QPushButton(*hide_icon, "", general);
     auto settings_button = new QPushButton(*settings_icon, "", general);
     auto inspector_button = new QPushButton(*inspector_icon, "", general);
+    auto record_button = new QPushButton(*add_icon, "", general);
+    
+    // Create title
+    auto title = new QLabel("Jesture", general);
+    title->setObjectName("title");
     
     // Styling names
-    quit_button->setObjectName("quit_button");
-    hide_button->setObjectName("hide_button");
+    quit_button->setObjectName("danger");
+    hide_button->setObjectName("warning");
+    record_button->setObjectName("danger");
     
     // Connecting button events to actions
     connect(quit_button, &QPushButton::released, this,
-            &MainWindow::quit_app);
+            &MainWindow::quit);
     connect(hide_button, &QPushButton::released, this,
             &MainWindow::hide_window);
     connect(settings_button, &QPushButton::released, this,
             &MainWindow::open_settings);
     connect(inspector_button, &QPushButton::released, this,
             &MainWindow::open_inspector);
+    connect(record_button, &QPushButton::released, this,
+            &MainWindow::toggle_recording);
+    connect(record_button, &QPushButton::released, this,
+            &MainWindow::toggle_recording_display);
     
     // Add to layout
     layout->addWidget(quit_button);
     layout->addWidget(hide_button);
     layout->addWidget(settings_button);
     layout->addWidget(inspector_button);
+    layout->addWidget(record_button);
+    layout->addWidget(title);
 }
 
-void MainWindow::setup_settings() {
+void MainWindow::setup_settings(JesturePipeSettings initial_settings) {
     // Create menu and add to interactive menus parent
     settings = new QWidget(interactives);
     interactives_layout->addWidget(settings);
@@ -153,12 +181,16 @@ void MainWindow::setup_settings() {
     for (const auto& camera : cameras)
         camera_descriptions.append(camera.description());
     camera_selector->addItems(camera_descriptions);
+    camera_selector->setCurrentIndex(initial_settings.camera_index);
+    connect(camera_selector, &QComboBox::currentIndexChanged, this, &MainWindow::update_camera_setting);
+    
+    // Camera setting layout
     auto camera_label = new QLabel("Camera", settings);
     layout->addWidget(camera_label, 3, 1);
     layout->addWidget(camera_selector, 3, 2);
 }
 
-void MainWindow::setup_inspector() {
+void MainWindow::setup_inspector(std::vector<jesturepipe::Gesture> initial_gestures) {
     // Create menu and add to interactive menus parent
     inspector = new QWidget(interactives);
     interactives_layout->addWidget(inspector);
@@ -180,7 +212,10 @@ void MainWindow::setup_inspector() {
     title->setObjectName("title");
     layout->addWidget(title, 0, 1);
 
-    auto gesture_list = new QListWidget(inspector);
+    // Create gesture list
+    gesture_list = new QListWidget(inspector);
+    for (auto gesture : initial_gestures)
+        add_gesture(gesture);
     layout->addWidget(gesture_list, 1, 1);
 }
 
@@ -204,7 +239,7 @@ void MainWindow::setup_system_tray() {
     connect(show_action, &QAction::triggered, this,
             &MainWindow::show_window);
     connect(quit_action, &QAction::triggered, this,
-            &MainWindow::quit_app);
+            &MainWindow::quit);
 
     // Show action starts toggled off
     show_action->setVisible(false);
@@ -252,13 +287,19 @@ void MainWindow::setup_stylesheet() {
             background-color: rgba(120, 120, 120, 60);
             border-color: rgb(120, 120, 120);
         }
-        QPushButton#quit_button:hover {
+        QPushButton#danger:hover {
             background-color: rgba(240, 60, 60, 60);
             border-color: rgb(240, 60, 60);
         }
-        QPushButton#hide_button:hover {
+        QPushButton#warning:hover {
             background-color: rgba(160, 160, 40, 60);
             border-color: rgb(160, 160, 40);
+        }
+        QListWidget {
+            background-color: transparent;
+        }
+        #recording {
+            border: 12px solid rgb(240, 60, 60);
         }
     )";
     
@@ -312,4 +353,10 @@ void MainWindow::show_window() {
     show();
 }
 
-void MainWindow::quit_app() { quit(); }
+void MainWindow::toggle_recording_display() {
+    if (recording_overlay->isHidden()) {
+        recording_overlay->show();
+    } else {
+        recording_overlay->hide();
+    }
+}
