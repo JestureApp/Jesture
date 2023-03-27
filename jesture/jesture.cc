@@ -1,127 +1,109 @@
-#include <QtCore/QList>
-#include <QtCore/QString>
-
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QScrollArea>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QScrollBar>
-#include <QtWidgets/QStackedLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QMenu>
 #include <QtWidgets/QSystemTrayIcon>
 
-#include <QtGui/QAction>
+#include "config_manager.h"
+#include "jesture/jesturepipe/controller.h"
+#include "jesture/jesturepipe/settings.h"
+#include "jesturepipe/gesture/gesture.h"
+#include "main_window.h"
+#include "tools/cpp/runfiles/runfiles.h"
 
-#include <QtMultimedia/QCamera>
-#include <QtMultimedia/QCameraDevice>
-#include <QtMultimedia/QMediaDevices>
-#include <QtMultimediaWidgets/QGraphicsVideoItem>
+using bazel::tools::cpp::runfiles::Runfiles;
+using namespace jesture;
 
-class MainWindow : public QMainWindow {
-public:
-    MainWindow() {
-        /*QScrollArea* scroll_area = new QScrollArea;
-        scroll_area->setFrameShape(QFrame::NoFrame);
-        scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        scroll_area->verticalScrollBar()->setStyleSheet("QScrollBar:vertical {width: 20px;}");
-        scroll_area->setWidget(content);
-        
-        QVBoxLayout* scroll_area_layout = new QVBoxLayout;
-        scroll_area_layout->setContentsMargins(0, 0, 0, 0);
-        scroll_area_layout->addWidget(scroll_area);
-        
-        setLayout(scroll_area_layout);*/
-        
-        // Create a top-level stack layout--only one child widget will be shown at a time
-        auto stack = new QWidget(this);
-        auto stack_layout = new QStackedLayout(stack);
-        
-        // Create main camera view
-        auto main = new QWidget(stack);
-        auto main_layout = new QVBoxLayout(main);
-        main->setLayout(main_layout);
-        
-        // Add a test label to the main camera view
-        auto test_label = new QLabel("test", main);
-        
-        // Create settings menu in a form layout
-        auto settings = new QWidget(stack);
-        settings->setStyleSheet("font-size: 20pt");
-        auto form = new QFormLayout(settings);
-        settings->setLayout(form);
-        
-        // Back button
-        auto back_from_settings = new QPushButton("Back", settings);
-        form->addRow(back_from_settings);
-        
-        // Form title
-        auto title = new QLabel("Settings", settings);
-        title->setStyleSheet("font-weight: bold; font-size: 24pt");
-        form->addRow(title);
-        
-        // Accuracy setting, using a slider
-        auto accuracy_slider = new QSlider(Qt::Horizontal, settings);
-        auto accuracy_description = new QLabel("This is a description of the accuracy setting.", settings);
-        accuracy_description->setStyleSheet("font-weight: 200; font-size: 16pt");
-        form->addRow("Accuracy", accuracy_slider);
-        form->addRow(accuracy_description);
-        
-        // Camera setting, using a dropdown box
-        auto camera_selector = new QComboBox(settings);
-        const auto cameras = QMediaDevices::videoInputs();
-        QList<QString> camera_descriptions;
-        for (const auto &camera : cameras) {
-            camera_descriptions.append(camera.description());
-        }
-        camera_selector->addItems(camera_descriptions);
-        auto camera_description = new QLabel("This is a description of the camera setting.", settings);
-        camera_description->setStyleSheet("font-weight: 200; font-size: 16pt");
-        form->addRow("Camera", camera_selector);
-        form->addRow(camera_description);
-        
-        // Add screens to stack
-        stack_layout->addWidget(settings);
-        stack_layout->addWidget(main);
-        stack->setLayout(stack_layout);
-        
-        auto system_tray = new QSystemTrayIcon(this);
-        auto system_tray_menu = new QMenu(this);
-        system_tray_menu->addAction("Hide");
-        system_tray->setContextMenu(system_tray_menu);
-        
-        // Display window
-        setCentralWidget(stack);
-        setWindowTitle("Jesture");
-    }
-private:
-};
+JesturePipeInit getInit(Runfiles *runfiles) {
+    std::string palm_model_full_path = runfiles->Rlocation(
+        "mediapipe/mediapipe/modules/palm_detection/"
+        "palm_detection_full.tflite");
 
-int main(int argc, char** argv) {
+    std::string palm_model_lite_path = runfiles->Rlocation(
+        "mediapipe/mediapipe/modules/palm_detection/"
+        "palm_detection_lite.tflite");
+
+    std::string landmark_model_full_path = runfiles->Rlocation(
+        "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite");
+
+    std::string landmark_model_lite_path = runfiles->Rlocation(
+        "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite");
+
+    return JesturePipeInit{palm_model_full_path, palm_model_lite_path,
+                           landmark_model_full_path, landmark_model_lite_path};
+}
+
+int main(int argc, char **argv) {
+    // Mediapipe/Jesturepipe logging
+    google::InitGoogleLogging(argv[0]);
+
+    // Create app
     QApplication app(argc, argv);
     app.setApplicationName("Jesture");
-    app.setOrganizationName("jesture");
-    
-    /* Notes for later:
-    QApplication::setWindowIcon(QIcon(":/some_path.ui.ico"));
-    QApplication::setOrganizationDomain("jesture");
-    QFile stylesheet(":/some_path.ui.qss");
-    
-    if(!stylesheet.open(QIDevice::ReadOnly)) {
-        qWarning("Unable to open stylesheet!");
-    } else {
-        app.setStyleSheet(stylesheet.readAll());
+
+    // Set app icon
+    auto app_icon = new QIcon("icons/settings.svg");
+    app.setWindowIcon(*app_icon);
+
+    // Setup runfiles for JesturePipe tflite files
+    std::string error;
+    auto runfiles = Runfiles::Create(argv[0], &error);
+    if (runfiles == nullptr) {
+        std::cout << "Error: " << error << std::endl;
+        return 1;
     }
-    */
-    
-    MainWindow* window = new MainWindow();
-    window->resize(1280, 720);
+
+    // Create app components
+    auto config_manager = new ConfigManager();
+    auto jesturepipe_controller =
+        new JesturePipeController(getInit(runfiles), &app);
+    auto window = new MainWindow(config_manager->get_settings(),
+                                 config_manager->get_gestures());
+
+    // Clear runfiles memory
+    delete runfiles;
+
+    // Qt Signal-Slot Connections
+    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit,
+                                    jesturepipe_controller,
+                                    &JesturePipeController::Stop);
+    // jesturepipe_controller->connect(
+    //     jesturepipe_controller, &JesturePipeController::gestureRecorded,
+    //     jesturepipe_controller, &JesturePipeController::addGesture);
+    jesturepipe_controller->connect(jesturepipe_controller,
+                                    &JesturePipeController::gestureRecorded,
+                                    window, &MainWindow::add_gesture);
+    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager,
+                            &ConfigManager::save);
+    config_manager->connect(
+        config_manager, &ConfigManager::settings_to_controller,
+        jesturepipe_controller, &JesturePipeController::updateSettings);
+    window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
+    window->connect(window, &MainWindow::toggle_recording,
+                    jesturepipe_controller,
+                    &JesturePipeController::toggleRecording);
+    window->connect(jesturepipe_controller, &JesturePipeController::frameReady,
+                    window, &MainWindow::new_camera_frame);
+    window->connect(window, &MainWindow::update_camera_setting, config_manager,
+                    &ConfigManager::update_camera_setting);
+
+    // Initialize app components
+    jesturepipe_controller->Start(config_manager->get_settings());
+    int i = 0;
+    for (auto gesture : config_manager->get_gestures()) {
+        jesturepipe_controller->addGesture(i, gesture);
+        i++;
+    }
+    window->setFixedSize(1280, 720);
     window->show();
-    
+
+    // Debug logging to detect gestures emitted
+    QObject::connect(
+        jesturepipe_controller, &JesturePipeController::gestureRecognizer,
+        [](int id) { qInfo() << "recognized gesture with id" << id; });
+    QObject::connect(jesturepipe_controller,
+                     &JesturePipeController::gestureRecorded,
+                     [](jesturepipe::Gesture gesture) {
+                         qInfo() << "Got recorded gesture with"
+                                 << gesture.frames->size() << "frames";
+                     });
+
     return app.exec();
 }

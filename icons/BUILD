@@ -1,0 +1,10 @@
+exports_files([
+    "settings.svg",
+    "show.svg",
+    "hide.svg",
+    "quit.svg",
+    "add_element.svg",
+    "cross.svg",
+    "left_arrow.svg",
+    "add.svg"
+])
