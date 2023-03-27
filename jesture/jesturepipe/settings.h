@@ -3,18 +3,16 @@
 
 #include <string>
 
+#include "jesturepipe/jesturepipe.h"
+
 namespace jesture {
 typedef struct {
     int camera_index;
-    int mode;
+    bool use_full;
 } JesturePipeSettings;
 
-typedef struct {
-    std::string palm_model_full_path;
-    std::string palm_model_lite_path;
-    std::string landmark_model_full_path;
-    std::string landmark_model_lite_path;
-} JesturePipeInit;
+using JesturePipeInit = jesturepipe::JesturePipeConfig;
+
 }  // namespace jesture
 
 #endif  // JESTURE_JESTUREPIPE_SETTINGS_H

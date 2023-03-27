@@ -8,7 +8,6 @@
 
 namespace jesture {
 namespace {
-using namespace std::placeholders;
 const char OutputFrameStream[] = "annotated_frame";
 const char AddGestureStream[] = "add_gesture";
 const char IsRecordingStream[] = "is_recording";
@@ -28,12 +27,19 @@ void add_packet(mediapipe::CalculatorGraph *graph, const std::string &stream,
         mediapipe::MakePacket<T>(packet).At(mediapipe::Timestamp(timestamp))));
 }
 
-JesturePipeController::JesturePipeController(JesturePipeInit init,
+JesturePipeController::JesturePipeController(const JesturePipeInit &init,
                                              QObject *parent) noexcept
-    : QObject(parent), running(false), recording(false), timestamp(0) {
-    check_status(jesturepipe::jesturepipe_graph(
-        &graph, init.palm_model_full_path, init.palm_model_lite_path,
-        init.landmark_model_full_path, init.landmark_model_lite_path));
+    : QObject(parent), running(false) {
+    using namespace std::placeholders;
+
+    check_status(pipe.Initialize(init));
+
+    check_status(pipe.OnAnnotatedFrame(
+        std::bind(&JesturePipeController::onFrame, this, _1)));
+    check_status(pipe.OnGestureRecognition(
+        std::bind(&JesturePipeController::onGestureRecognized, this, _1)));
+    check_status(pipe.OnRecordedGesture(
+        std::bind(&JesturePipeController::onGestureRecorded, this, _1)));
 }
 
 JesturePipeController::~JesturePipeController() noexcept { Stop(); }
@@ -41,24 +47,7 @@ JesturePipeController::~JesturePipeController() noexcept { Stop(); }
 void JesturePipeController::Start(JesturePipeSettings settings) noexcept {
     if (running) return;
 
-    const std::map<std::string, mediapipe::Packet> side_packets{
-        {"camera_index",
-         mediapipe::MakePacket<int>(settings.camera_index).At(mediapipe::Timestamp(0))},
-        {"mode", mediapipe::MakePacket<int>(settings.mode).At(mediapipe::Timestamp(0))}};
-
-    check_status(graph.ObserveOutputStream(
-        OutputFrameStream,
-        std::bind(&JesturePipeController::onFrame, this, _1)));
-
-    check_status(graph.ObserveOutputStream(
-        RecognizedGestureStream,
-        std::bind(&JesturePipeController::onGestureRecognized, this, _1)));
-
-    check_status(graph.ObserveOutputStream(
-        RecordedGestureStream,
-        std::bind(&JesturePipeController::onGestureRecorded, this, _1)));
-
-    check_status(graph.StartRun(side_packets));
+    check_status(pipe.Start(settings.camera_index, settings.use_full));
 
     running = true;
 }
@@ -66,9 +55,7 @@ void JesturePipeController::Start(JesturePipeSettings settings) noexcept {
 void JesturePipeController::Stop() noexcept {
     if (!running) return;
 
-    check_status(graph.CloseAllPacketSources());
-
-    check_status(graph.WaitUntilDone());
+    check_status(pipe.Stop());
 
     running = false;
 }
@@ -79,32 +66,22 @@ void JesturePipeController::updateSettings(
     Start(settings);
 }
 
-void JesturePipeController::addGesture(jesturepipe::Gesture gesture) noexcept {
-    // check_status(graph.AddPacketToInputStream(
-    //     AddGestureStream,
-    //     mediapipe::MakePacket<jesturepipe::Gesture>(gesture).At(
-    //         mediapipe::Timestamp().NextAllowedInStream())));
-
-    add_packet(&graph, AddGestureStream, gesture, timestamp++);
+void JesturePipeController::addGesture(int gesture_id,
+                                       jesturepipe::Gesture gesture) noexcept {
+    pipe.AddGesture(gesture_id, std::move(gesture));
 }
 
 void JesturePipeController::toggleRecording() noexcept {
-    add_packet(&graph, IsRecordingStream, !recording, timestamp++);
-
-    recording = !recording;
+    check_status(pipe.SetRecording(!pipe.IsRecording()));
 }
 
 absl::Status JesturePipeController::onFrame(
-    mediapipe::Packet frame_packet) noexcept {
-    // CHECKME: Image manipulation is expensive. Maybe there is a way to check
-    // if anyone is listening to the `frameReady` slot.
+    const mediapipe::Packet &packet) noexcept {
+    const mediapipe::ImageFrame &frame = packet.Get<mediapipe::ImageFrame>();
 
-    // qDebug() << "Got new frame from JesturePipe at "
-    //          << frame_packet.Timestamp().Value();
+    cv::Mat mat_view = mediapipe::formats::MatView(&frame);
 
-    auto &output_frame = frame_packet.Get<mediapipe::ImageFrame>();
-
-    cv::Mat mat = mediapipe::formats::MatView(&output_frame);
+    cv::Mat mat = mat_view.clone();
 
     emit frameReady(mat);
 
@@ -112,18 +89,14 @@ absl::Status JesturePipeController::onFrame(
 }
 
 absl::Status JesturePipeController::onGestureRecognized(
-    mediapipe::Packet gesture_packet) noexcept {
-    int gesture_id = gesture_packet.Get<int>();
-
+    const int &gesture_id) noexcept {
     emit gestureRecognizer(gesture_id);
 
     return absl::OkStatus();
 }
 
 absl::Status JesturePipeController::onGestureRecorded(
-    mediapipe::Packet gesture_packet) noexcept {
-    jesturepipe::Gesture gesture = gesture_packet.Get<jesturepipe::Gesture>();
-
+    const jesturepipe::Gesture &gesture) noexcept {
     emit gestureRecorded(gesture);
 
     return absl::OkStatus();

@@ -49,30 +49,48 @@ int main(int argc, char **argv) {
         std::cout << "Error: " << error << std::endl;
         return 1;
     }
-    
+
     // Create app components
     auto config_manager = new ConfigManager();
-    auto jesturepipe_controller = new JesturePipeController(getInit(runfiles), &app);
-    auto window = new MainWindow(config_manager->get_settings(), config_manager->get_gestures());
-    
+    auto jesturepipe_controller =
+        new JesturePipeController(getInit(runfiles), &app);
+    auto window = new MainWindow(config_manager->get_settings(),
+                                 config_manager->get_gestures());
+
     // Clear runfiles memory
     delete runfiles;
-    
+
     // Qt Signal-Slot Connections
-    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit, jesturepipe_controller, &JesturePipeController::Stop);
-    jesturepipe_controller->connect(jesturepipe_controller, &JesturePipeController::gestureRecorded, jesturepipe_controller, &JesturePipeController::addGesture);
-    jesturepipe_controller->connect(jesturepipe_controller, &JesturePipeController::gestureRecorded, window, &MainWindow::add_gesture);
-    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager, &ConfigManager::save);
-    config_manager->connect(config_manager, &ConfigManager::settings_to_controller, jesturepipe_controller, &JesturePipeController::updateSettings);
+    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit,
+                                    jesturepipe_controller,
+                                    &JesturePipeController::Stop);
+    // jesturepipe_controller->connect(
+    //     jesturepipe_controller, &JesturePipeController::gestureRecorded,
+    //     jesturepipe_controller, &JesturePipeController::addGesture);
+    jesturepipe_controller->connect(jesturepipe_controller,
+                                    &JesturePipeController::gestureRecorded,
+                                    window, &MainWindow::add_gesture);
+    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager,
+                            &ConfigManager::save);
+    config_manager->connect(
+        config_manager, &ConfigManager::settings_to_controller,
+        jesturepipe_controller, &JesturePipeController::updateSettings);
     window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
-    window->connect(window, &MainWindow::toggle_recording, jesturepipe_controller, &JesturePipeController::toggleRecording);
-    window->connect(jesturepipe_controller, &JesturePipeController::frameReady, window, &MainWindow::new_camera_frame);
-    window->connect(window, &MainWindow::update_camera_setting, config_manager, &ConfigManager::update_camera_setting);
-    
+    window->connect(window, &MainWindow::toggle_recording,
+                    jesturepipe_controller,
+                    &JesturePipeController::toggleRecording);
+    window->connect(jesturepipe_controller, &JesturePipeController::frameReady,
+                    window, &MainWindow::new_camera_frame);
+    window->connect(window, &MainWindow::update_camera_setting, config_manager,
+                    &ConfigManager::update_camera_setting);
+
     // Initialize app components
     jesturepipe_controller->Start(config_manager->get_settings());
-    for (auto gesture : config_manager->get_gestures())
-        jesturepipe_controller->addGesture(gesture);
+    int i = 0;
+    for (auto gesture : config_manager->get_gestures()) {
+        jesturepipe_controller->addGesture(i, gesture);
+        i++;
+    }
     window->setFixedSize(1280, 720);
     window->show();
 
@@ -84,7 +102,7 @@ int main(int argc, char **argv) {
                      &JesturePipeController::gestureRecorded,
                      [](jesturepipe::Gesture gesture) {
                          qInfo() << "Got recorded gesture with"
-                                 << gesture.frames.size() << "frames";
+                                 << gesture.frames->size() << "frames";
                      });
 
     return app.exec();
