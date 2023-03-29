@@ -1,6 +1,7 @@
 #include "main_window.h"
 
-#include <vector>
+#include <QKeySequence>
+#include <QShortcut>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtGui/QAction>
@@ -18,21 +19,18 @@
 #include <QtWidgets/QStackedLayout>
 #include <QtWidgets/QSystemTrayIcon>
 #include <QtWidgets/QWidget>
-#include <QShortcut>
-#include <QKeySequence>
+#include <vector>
 
-#include "jesture/components/frame_view.h"
-#include "jesture/components/gesture_editor.h"
+#include "jesture/components/camera_feed.h"
 #include "jesture/jesturepipe/settings.h"
 #include "jesturepipe/gesture/gesture.h"
 
 using namespace jesture;
 
-MainWindow::MainWindow(
-    JesturePipeSettings initial_settings,
-    std::vector<jesturepipe::Gesture> initial_gestures,
-    QWidget* parent
-) : QMainWindow(parent, Qt::Window | Qt::FramelessWindowHint) {
+MainWindow::MainWindow(JesturePipeSettings initial_settings,
+                       std::vector<jesturepipe::Gesture> initial_gestures,
+                       QWidget* parent)
+    : QMainWindow(parent, Qt::Window | Qt::FramelessWindowHint) {
     // Create the parent widget
     auto content = new QWidget(this);
     auto content_layout = new QStackedLayout(content);
@@ -45,17 +43,11 @@ MainWindow::MainWindow(
     recording_overlay->setObjectName("recording");
     content_layout->addWidget(recording_overlay);
     recording_overlay->hide();
-    
+
     // Camera feed
-    camera_feed = new FrameView(content);
+    camera_feed = new CameraFeed(content);
     content_layout->addWidget(camera_feed);
-    connect(
-        this,
-        &MainWindow::new_camera_frame,
-        camera_feed,
-        &FrameView::setFrame
-    );
-    
+
     // Create a parent for all interactive menus
     interactives = new QWidget(content);
     interactives_layout = new QStackedLayout(interactives);
@@ -70,14 +62,18 @@ MainWindow::MainWindow(
 
     // Check if platform supports the system tray
     if (QSystemTrayIcon::isSystemTrayAvailable()) setup_system_tray();
-    
+
     auto settings_shortcut = new QShortcut(QKeySequence::Preferences, this);
-    connect(settings_shortcut, &QShortcut::activated, this, &MainWindow::open_settings);
-    auto hide_shortcut = new QShortcut(QKeySequence(Qt::Key_Control | Qt::Key_H), this);
-    connect(hide_shortcut, &QShortcut::activated, this, &MainWindow::hide_window);
+    connect(settings_shortcut, &QShortcut::activated, this,
+            &MainWindow::open_settings);
+    auto hide_shortcut =
+        new QShortcut(QKeySequence(Qt::Key_Control | Qt::Key_H), this);
+    connect(hide_shortcut, &QShortcut::activated, this,
+            &MainWindow::hide_window);
     auto escape_shortcut = new QShortcut(QKeySequence::Cancel, this);
-    connect(escape_shortcut, &QShortcut::activated, this, &MainWindow::close_settings);
-    
+    connect(escape_shortcut, &QShortcut::activated, this,
+            &MainWindow::close_settings);
+
     setWindowTitle("Jesture");
     setup_stylesheet();
 }
@@ -90,7 +86,7 @@ void MainWindow::setup_general() {
     // Create menu and add to interactive menus parent
     general = new QWidget(interactives);
     interactives_layout->addWidget(general);
-    
+
     // Create layout
     auto layout = new QHBoxLayout(general);
     layout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -109,19 +105,18 @@ void MainWindow::setup_general() {
     auto settings_button = new QPushButton(*settings_icon, "", general);
     auto inspector_button = new QPushButton(*inspector_icon, "", general);
     auto record_button = new QPushButton(*add_icon, "", general);
-    
+
     // Create title
     auto title = new QLabel("Jesture", general);
     title->setObjectName("title");
-    
+
     // Styling names
     quit_button->setObjectName("danger");
     hide_button->setObjectName("warning");
     record_button->setObjectName("danger");
-    
+
     // Connecting button events to actions
-    connect(quit_button, &QPushButton::released, this,
-            &MainWindow::quit);
+    connect(quit_button, &QPushButton::released, this, &MainWindow::quit);
     connect(hide_button, &QPushButton::released, this,
             &MainWindow::hide_window);
     connect(settings_button, &QPushButton::released, this,
@@ -132,7 +127,7 @@ void MainWindow::setup_general() {
             &MainWindow::toggle_recording);
     connect(record_button, &QPushButton::released, this,
             &MainWindow::toggle_recording_display);
-    
+
     // Add to layout
     layout->addWidget(quit_button);
     layout->addWidget(hide_button);
@@ -151,7 +146,7 @@ void MainWindow::setup_settings(JesturePipeSettings initial_settings) {
     auto layout = new QGridLayout();
     layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     settings->setLayout(layout);
-    
+
     // Create back button
     auto back_icon = new QIcon("icons/left_arrow.svg");
     auto back_button = new QPushButton(*back_icon, "", settings);
@@ -167,8 +162,10 @@ void MainWindow::setup_settings(JesturePipeSettings initial_settings) {
     // Accuracy setting, using a slider
     auto accuracy_slider = new QSlider(Qt::Horizontal, settings);
     auto accuracy_label = new QLabel("Accuracy", settings);
-    auto accuracy_description =
-        new QLabel("Lower this setting for better peformance.\nRaise this setting for better gesture reading.", settings);
+    auto accuracy_description = new QLabel(
+        "Lower this setting for better peformance.\nRaise this setting for "
+        "better gesture reading.",
+        settings);
     accuracy_description->setObjectName("description");
     layout->addWidget(accuracy_label, 1, 1);
     layout->addWidget(accuracy_slider, 1, 2);
@@ -182,15 +179,17 @@ void MainWindow::setup_settings(JesturePipeSettings initial_settings) {
         camera_descriptions.append(camera.description());
     camera_selector->addItems(camera_descriptions);
     camera_selector->setCurrentIndex(initial_settings.camera_index);
-    connect(camera_selector, &QComboBox::currentIndexChanged, this, &MainWindow::update_camera_setting);
-    
+    connect(camera_selector, &QComboBox::currentIndexChanged, this,
+            &MainWindow::update_camera_setting);
+
     // Camera setting layout
     auto camera_label = new QLabel("Camera", settings);
     layout->addWidget(camera_label, 3, 1);
     layout->addWidget(camera_selector, 3, 2);
 }
 
-void MainWindow::setup_inspector(std::vector<jesturepipe::Gesture> initial_gestures) {
+void MainWindow::setup_inspector(
+    std::vector<jesturepipe::Gesture> initial_gestures) {
     // Create menu and add to interactive menus parent
     inspector = new QWidget(interactives);
     interactives_layout->addWidget(inspector);
@@ -214,8 +213,7 @@ void MainWindow::setup_inspector(std::vector<jesturepipe::Gesture> initial_gestu
 
     // Create gesture list
     gesture_list = new QListWidget(inspector);
-    for (auto gesture : initial_gestures)
-        add_gesture(gesture);
+    for (auto gesture : initial_gestures) add_gesture(gesture);
     layout->addWidget(gesture_list, 1, 1);
 }
 
@@ -234,12 +232,9 @@ void MainWindow::setup_system_tray() {
     hide_action = new QAction(*hide_icon, "Hide", tray_menu);
     show_action = new QAction(*show_icon, "Show", tray_menu);
     quit_action = new QAction(*quit_icon, "Quit", tray_menu);
-    connect(hide_action, &QAction::triggered, this,
-            &MainWindow::hide_window);
-    connect(show_action, &QAction::triggered, this,
-            &MainWindow::show_window);
-    connect(quit_action, &QAction::triggered, this,
-            &MainWindow::quit);
+    connect(hide_action, &QAction::triggered, this, &MainWindow::hide_window);
+    connect(show_action, &QAction::triggered, this, &MainWindow::show_window);
+    connect(quit_action, &QAction::triggered, this, &MainWindow::quit);
 
     // Show action starts toggled off
     show_action->setVisible(false);
@@ -302,7 +297,7 @@ void MainWindow::setup_stylesheet() {
             border: 12px solid rgb(240, 60, 60);
         }
     )";
-    
+
     // Set window's stylesheet
     setStyleSheet(stylesheet);
 }
@@ -335,10 +330,8 @@ void MainWindow::mousePressEvent(QMouseEvent* mouse_event) {
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent* mouse_event) {
-    move(
-        mouse_event->globalPosition().x() - mouse_x,
-        mouse_event->globalPosition().y() - mouse_y
-    );
+    move(mouse_event->globalPosition().x() - mouse_x,
+         mouse_event->globalPosition().y() - mouse_y);
 }
 
 void MainWindow::hide_window() {

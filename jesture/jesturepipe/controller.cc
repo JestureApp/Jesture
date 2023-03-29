@@ -40,6 +40,9 @@ JesturePipeController::JesturePipeController(const JesturePipeInit &init,
         std::bind(&JesturePipeController::onGestureRecognized, this, _1)));
     check_status(pipe.OnRecordedGesture(
         std::bind(&JesturePipeController::onGestureRecorded, this, _1)));
+
+    check_status(pipe.OnLandmarks(
+        std::bind(&JesturePipeController::OnLandmarks, this, _1)));
 }
 
 JesturePipeController::~JesturePipeController() noexcept { Stop(); }
@@ -98,6 +101,13 @@ absl::Status JesturePipeController::onGestureRecognized(
 absl::Status JesturePipeController::onGestureRecorded(
     const jesturepipe::Gesture &gesture) noexcept {
     emit gestureRecorded(gesture);
+
+    return absl::OkStatus();
+}
+
+absl::Status JesturePipeController::OnLandmarks(
+    const std::vector<mediapipe::NormalizedLandmarkList> landmarks) noexcept {
+    emit landmarksReady(landmarks);
 
     return absl::OkStatus();
 }

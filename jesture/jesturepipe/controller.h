@@ -37,12 +37,15 @@ class JesturePipeController : public QObject {
     void frameReady(cv::Mat frame);
     void gestureRecognizer(int gesture_id);
     void gestureRecorded(jesturepipe::Gesture gesture);
+    void landmarksReady(std::vector<mediapipe::NormalizedLandmarkList>);
 
    private:
     absl::Status onFrame(const mediapipe::Packet& packet) noexcept;
     absl::Status onGestureRecognized(const int& gesture_id) noexcept;
     absl::Status onGestureRecorded(
         const jesturepipe::Gesture& gesture) noexcept;
+    absl::Status OnLandmarks(
+        const std::vector<mediapipe::NormalizedLandmarkList>) noexcept;
 
     bool running;
     jesturepipe::JesturePipe pipe;

@@ -8,22 +8,18 @@
 #include "mediapipe/framework/port/opencv_core_inc.h"
 
 namespace jesture {
-class FrameView : public QWidget {
+class CameraFeed : public QWidget {
     Q_OBJECT
 
    public:
-    explicit FrameView(QWidget *parent = nullptr) noexcept;
+    explicit CameraFeed(QWidget *parent = nullptr) noexcept;
     void blur();
     void unblur();
 
-   public slots:
-    void setFrame(cv::Mat);
-
-   protected:
-    void paintEvent(QPaintEvent *event) override;
+    // protected:
+    // void paintEvent(QPaintEvent *event) override;
 
    private:
-    QImage img;
     bool painted;
     bool blur_mode;
 };
