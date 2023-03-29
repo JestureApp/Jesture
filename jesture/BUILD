@@ -28,8 +28,9 @@ qt_cc_library(
     ],
     moc_hdrs = ["main_window.h"],
     deps = [
-        "//jesture/components:frame_view",
-        "//jesture/components:gesture_editor",
+        "//jesture/components:camera_feed",
+        "//jesture/jesturepipe:settings",
+        "//jesture/jesturepipe:controller",
         "@qt//:qt_core",
         "@qt//:qt_gui",
         "@qt//:qt_multimedia",

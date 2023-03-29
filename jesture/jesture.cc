@@ -79,8 +79,6 @@ int main(int argc, char **argv) {
     window->connect(window, &MainWindow::toggle_recording,
                     jesturepipe_controller,
                     &JesturePipeController::toggleRecording);
-    window->connect(jesturepipe_controller, &JesturePipeController::frameReady,
-                    window, &MainWindow::new_camera_frame);
     window->connect(window, &MainWindow::update_camera_setting, config_manager,
                     &ConfigManager::update_camera_setting);
 
