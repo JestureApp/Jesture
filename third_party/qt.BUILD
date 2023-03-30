@@ -1,4 +1,4 @@
-load("@local_config_qt//:local_qt.bzl", "add_binary", "qt_module", "register_toolchain")
+load("@local_config_qt//:local_qt.bzl", "qt_module", "register_toolchain")
 
 ################################################################################
 # Toolchains
