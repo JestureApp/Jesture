@@ -110,6 +110,16 @@ qt_module(
     ],
 )
 
+qt_module(
+    name = "qt_qml_workerscript",
+    include_dir = "QtQmlWorkerScript",
+    lib = "Qt6QmlWorkerScript",
+    deps = [
+        ":qt_core",
+        ":qt_qml",
+    ],
+)
+
 # qt_quick
 qt_module(
     name = "qt_quick",
@@ -139,4 +149,4 @@ qt_module(
 # Binaries
 ################################################################################
 
-add_binary(name = "moc")
+# add_binary(name = "moc")

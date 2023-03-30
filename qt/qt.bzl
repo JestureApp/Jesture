@@ -6,6 +6,8 @@ Derived from:
  - https://github.com/Vertexwahn/rules_qt6
 """
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
+
 # TODO: make Qt plugin available
 
 # TODO: make Qt qml lib files available
@@ -50,64 +52,126 @@ qt_moc = rule(
     toolchains = ["@qt//:toolchain_type"],
 )
 
-# def _qt_qrc_impl(ctx):
-#     out = ctx.outputs.out
+def _qt_qrc_impl(ctx):
+    out = ctx.outputs.out
 
-#     content = "<RCC>\n  <qresource prefix=\\\"/\\\">"
-#     for f in ctx.files.files:
-#         content += "\n <file>%s</file>" % f.path
-#     content += "\n </qresource>\n</RCC>"
+    prefix = ctx.attr.prefix
 
-#     cmd = ["echo", '"%s"' % content, ">", out.path]
+    content = "<RCC>\n\t<qresource prefix=\\\"%s\\\">" % prefix
 
-#     exec_requirements = {}
-#     for elem in ctx.attr.tags:
-#         exec_requirements[elem] = "1"
+    inputs = []
 
-#     ctx.actions.run_shell(
-#         command = " ".join(cmd),
-#         outputs = [out],
-#         execution_requirements = exec_requirements,
-#     )
+    for t, alias in ctx.attr.data.items():
+        files = t.files.to_list()
 
-#     return [OutputGroupInfo(qrc = depset([out]))]
+        if (len(files) != 1):
+            fail("Each data target must have exactly one file. %s has %d files" % (t, len(files)))
 
-# qt_qrc = rule(
-#     implementation = _qt_qrc_impl,
-#     attrs = {
-#         "files": attr.label_list(
-#             doc = "Files to list in the qrc file",
-#         ),
-#         "out": attr.output(),
-#     },
-# )
+        file = files[0]
 
-def qt_qrc(
-        name,
-        files,
-        out = None,
-        data = []):
-    script_name = name + "_qrc_sh"
-    native.sh_binary(
-        name = script_name,
-        srcs = ["//qt:qrc.sh"],
-        deps = [
-            "@bazel_tools//tools/bash/runfiles",
-        ],
-        data = data,
+        prefixed_file_path = paths.join(ctx.attr.resource_link_prefix, file.path)
+        input = ctx.actions.declare_file(prefixed_file_path)
+        ctx.actions.symlink(
+            output = input,
+            target_file = file,
+        )
+
+        inputs.append(input)
+
+        content += "\n\t\t<file alias=\\\"%s\\\">%s</file>" % (alias, prefixed_file_path)
+
+    content += "\n\t</qresource>\n</RCC>"
+
+    cmd = ["echo", '"%s"' % content, ">", out.path]
+
+    execution_requirements = {}
+    for elem in ctx.attr.tags:
+        execution_requirements[elem] = "1"
+
+    ctx.actions.run_shell(
+        command = " ".join(cmd),
+        # inputs = inputs,
+        outputs = [out],
+        execution_requirements = execution_requirements,
     )
 
-    native.genrule(
-        name = name,
-        srcs = data,
-        outs = [out],
-        cmd = (
-            ("$(location %s)" % script_name) + " " +
-            "$@" + " " +
-            (" ".join(files))
+    return [OutputGroupInfo(qrc = depset([out]))]
+
+qt_qrc = rule(
+    implementation = _qt_qrc_impl,
+    attrs = {
+        "data": attr.label_keyed_string_dict(
+            doc = "Data Files to add to qrc file",
+            allow_files = True,
+            mandatory = True,
         ),
-        tools = [script_name],
+        "prefix": attr.string(
+            doc = "The prefix for the qrc file",
+            mandatory = False,
+            default = "/",
+        ),
+        "out": attr.output(mandatory = True),
+        "resource_link_prefix": attr.string(
+            mandatory = False,
+            default = "_resources",
+        ),
+    },
+)
+
+def _qt_rcc_impl(ctx):
+    toolchain_info = ctx.toolchains["@qt//:toolchain_type"].qtinfo
+
+    inputs = []
+    for f in ctx.files.files:
+        prefixed_file_path = paths.join(ctx.attr.resource_link_prefix, f.path)
+
+        input = ctx.actions.declare_file(prefixed_file_path)
+        ctx.actions.symlink(
+            output = input,
+            target_file = f,
+        )
+
+        inputs.append(input)
+
+    args = [
+        "--name",
+        ctx.attr.resource_name,
+        "--output",
+        ctx.outputs.out.path,
+        ctx.file.qrc.path,
+    ]
+
+    execution_requirements = {}
+    for elem in ctx.attr.tags:
+        execution_requirements[elem] = "1"
+
+    ctx.actions.run(
+        inputs = [ctx.file.qrc] + inputs,
+        outputs = [ctx.outputs.out],
+        arguments = args,
+        executable = toolchain_info.rcc,
+        execution_requirements = execution_requirements,
     )
+
+    return [OutputGroupInfo(out = depset([ctx.outputs.out]))]
+
+qt_rcc = rule(
+    implementation = _qt_rcc_impl,
+    attrs = {
+        "resource_name": attr.string(
+            doc = "Create an external initialization function with <name>",
+            mandatory = True,
+        ),
+        "qrc": attr.label(allow_single_file = True, mandatory = True),
+        "files": attr.label_list(allow_files = True, mandatory = False),
+        "out": attr.output(mandatory = True),
+        "resource_link_prefix": attr.string(
+            mandatory = False,
+            default = "_resources",
+        ),
+    },
+    toolchains = ["@qt//:toolchain_type"],
+)
 
 def qt_cc_library(
         name,
@@ -139,6 +203,7 @@ def qt_cc_library(
             name = moc_name,
             hdr = hdr,
             out = moc_name + ".cc",
+            args = moc_args,
         )
 
         moc_srcs.append(moc_name)
@@ -169,5 +234,51 @@ def qt_cc_binary(
 
 def qt_resource(
         name,
-        files):
+        files,
+        prefix = "/",
+        deps = [],
+        **kwargs):
+    """_summary_
+
+    Args:
+        name (_type_): _description_
+        files (_type_): _description_
+        prefix (str, optional): _description_. Defaults to "/".
+        deps: _description_. Defaults to [].
+        **kwargs: _description_
+    """
+    data = {f: a for a, f in files.items()}
+
+    qrc_file = name + "_qrc.qrc"
+
+    qt_qrc(
+        name = name + "_qrc",
+        data = data,
+        prefix = prefix,
+        out = qrc_file,
+    )
+
+    file_targets = files.values()
+    gen_file = name + "_gen.cpp"
+    resource_name = native.package_name().replace("/", "_") + "_" + name
+
+    qt_rcc(
+        name = name + "_gen",
+        resource_name = resource_name,
+        files = file_targets,
+        qrc = qrc_file,
+        out = gen_file,
+        tags = ["local"],
+    )
+
+    native.cc_library(
+        name = name,
+        srcs = [gen_file],
+        alwayslink = 1,
+        deps = [
+            "@qt//:qt_core",
+        ] + deps,
+        **kwargs
+    )
+
     pass

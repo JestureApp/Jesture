@@ -10,4 +10,5 @@ def app(
         name = name,
         srcs = bin_srcs,
         deps = bin_deps,
+        copts = ["-fPIC"],
     )

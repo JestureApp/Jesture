@@ -1,33 +1,32 @@
-load("//qt:qt.bzl", "qt_qrc")
-load("//jesture/tool:app.bzl", "app")
+load("//qt:qt.bzl", "qt_resource")
 
 package(default_visibility = ["//visibility:public"])
 
-# cc_binary(
-#     name = "jesture",
-#     srcs = [
-#         "jesture.cc",
-#     ],
-#     data = [
-#         "@mediapipe//mediapipe/modules/hand_landmark:com_google_mediapipe_hand_landmark_full_tflite_ln",
-#     ],
-# )
+exports_files([
+    "main.qml",
+])
 
-qt_qrc(
-    name = "jesture_qrc",
-    out = "jesture.qrc",
-    data = [
-        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
-        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
-    ],
-    files = [
-        "mediapipe/modules/palm_detection:palm_detection_full.tflite",
-    ],
+qt_resource(
+    name = "jesture_qml",
+    files = {
+        "main.qml": ":main.qml",
+    },
+    prefix = "/jesture",
 )
 
-app(
+cc_binary(
     name = "jesture",
-    bin_srcs = [
-        "jesture.cc",
+    srcs = ["jesture.cc"],
+    env = {
+        "QT_PLUGIN_PATH": "/usr/lib/x86_64-linux-gnu/qt6/plugins",
+    },
+    deps = [
+        ":jesture_qml",
+        "//icons",
+        "@qt//:qt_gui",
+        "@qt//:qt_qml",
+        "@qt//:qt_qml_workerscript",
+        "@qt//:qt_quick",
+        "@qt//:qt_widgets",
     ],
 )

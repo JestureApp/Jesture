@@ -9,6 +9,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 possible_linux_installs = [
     ("/usr", "include/qt6", "lib", "lib/qt6"),
     ("/usr", "include/qt6", "lib", "bin"),
+    ("/usr", "include/x86_64-linux-gnu/qt6", "lib/x86_64-linux-gnu/", "lib/qt6/libexec"),
 ]
 
 possible_osx_installs = [
@@ -33,6 +34,14 @@ def _validate_install(install, repository_ctx):
         return False
 
     res = repository_ctx.execute([moc_path, "--version"])
+    if res.return_code != 0 or res.stdout.index("6.") == -1:
+        return False
+
+    rcc_path = paths.join(bin_abs, "rcc")
+    if not repository_ctx.path(rcc_path).exists:
+        return False
+
+    res = repository_ctx.execute([rcc_path, "--version"])
     if res.return_code != 0 or res.stdout.index("6.") == -1:
         return False
 

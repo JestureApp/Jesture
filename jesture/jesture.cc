@@ -1,6 +1,18 @@
-int main(int argc, char **argv) {
-    // Mediapipe/Jesturepipe logging
-    // google::InitGoogleLogging(argv[0]);
+#include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QQmlContext>
+#include <QtQuick/QQuickView>
+#include <QtWidgets/QApplication>
+#include <iostream>
 
-    return 0;
+int main(int argc, char *argv[]) {
+  QApplication app(argc, argv);
+  QQmlApplicationEngine engine;
+
+  engine.load(QUrl(QStringLiteral("qrc:/jesture/main.qml")));
+
+  if (engine.rootObjects().isEmpty()) {
+    return 1;
+  }
+
+  return app.exec();
 }
