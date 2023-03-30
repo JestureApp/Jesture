@@ -1,23 +1,11 @@
-config_setting (
-    name = "linux",
-    constraint_values = [
-        "@platforms//os:linux"
-    ],
-    visibility = ["//visibility:public"]
-)
+load("//distutils:dist.bzl", "distribution")
 
-config_setting (
-    name = "windows",
-    constraint_values = [
-        "@platforms//os:windows"
-    ],
-    visibility = ["//visibility:public"]
-)
-
-config_setting (
-    name = "macos",
-    constraint_values = [
-        "@platforms//os:macos"
-    ],
-    visibility = ["//visibility:public"]
+distribution(
+    name = "dist",
+    bin = "//jesture",
+    deb_package_desc = "TODO",
+    deb_package_name = "jesture",
+    maintainer = "TODO",
+    product_name = "jesture",
+    version = "0.5.0",
 )

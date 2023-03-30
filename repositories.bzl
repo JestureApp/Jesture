@@ -20,12 +20,20 @@ def jesture_repositories():
     )
 
     maybe(
+        http_archive,
+        name = "rules_pkg",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.9.0/rules_pkg-0.9.0.tar.gz",
+            "https://github.com/bazelbuild/rules_pkg/releases/download/0.9.0/rules_pkg-0.9.0.tar.gz",
+        ],
+        sha256 = "335632735e625d408870ec3e361e192e99ef7462315caa887417f4d88c4c8fb8",
+    )
+
+    maybe(
         git_repository,
         name = "actions",
         remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
         commit = "8ebd373380467080dd2508864ce7d43a4abef58a",
-        # shallow_since = "1677290156 -0700",
-        # tag = "v0.1.1",
     )
 
     maybe(
@@ -33,12 +41,4 @@ def jesture_repositories():
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
         commit = "406e73c824f2578390445171b1071be9d8167c16",
-        # shallow_since = "1677290156 -0700",
-        # tag = "v0.1.1",
     )
-
-    # maybe(
-    #     native.local_repository,
-    #     name = "jesturepipe",
-    #     path = "../JesturePipe",
-    # )

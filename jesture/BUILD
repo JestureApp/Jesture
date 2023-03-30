@@ -1,4 +1,4 @@
-load("//qt:qt.bzl", "qt_resource")
+load("//qt:qt.bzl", "qt_cc_binary", "qt_resource")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,16 +14,12 @@ qt_resource(
     prefix = "/jesture",
 )
 
-cc_binary(
+qt_cc_binary(
     name = "jesture",
     srcs = ["jesture.cc"],
-    env = {
-        "QT_PLUGIN_PATH": "/usr/lib/x86_64-linux-gnu/qt6/plugins",
-    },
     deps = [
         ":jesture_qml",
         "//icons",
-        "@qt//:qt_gui",
         "@qt//:qt_qml",
         "@qt//:qt_qml_workerscript",
         "@qt//:qt_quick",
