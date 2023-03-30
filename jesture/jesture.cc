@@ -5,14 +5,14 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  QApplication app(argc, argv);
-  QQmlApplicationEngine engine;
+    QApplication app(argc, argv);
+    QQmlApplicationEngine engine;
 
-  engine.load(QUrl(QStringLiteral("qrc:/jesture/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/jesture/main.qml")));
 
-  if (engine.rootObjects().isEmpty()) {
-    return 1;
-  }
+    if (engine.rootObjects().isEmpty()) {
+        return 1;
+    }
 
-  return app.exec();
+    return app.exec();
 }
