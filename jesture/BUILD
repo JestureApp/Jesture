@@ -1,56 +1,33 @@
-load("//qt:qt.bzl", "qt_cc_library")
+load("//qt:qt.bzl", "qt_qrc")
+load("//jesture/tool:app.bzl", "app")
 
 package(default_visibility = ["//visibility:public"])
 
-qt_cc_library(
-    name = "config_manager",
-    srcs = ["config_manager.cc"],
-    moc_hdrs = ["config_manager.h"],
-    deps = [
-        "@qt//:qt_core",
-        "//jesture/jesturepipe:settings",
-        "@jesturepipe//jesturepipe/gesture",
-    ],
-)
+# cc_binary(
+#     name = "jesture",
+#     srcs = [
+#         "jesture.cc",
+#     ],
+#     data = [
+#         "@mediapipe//mediapipe/modules/hand_landmark:com_google_mediapipe_hand_landmark_full_tflite_ln",
+#     ],
+# )
 
-qt_cc_library(
-    name = "main_window",
-    srcs = ["main_window.cc"],
+qt_qrc(
+    name = "jesture_qrc",
+    out = "jesture.qrc",
     data = [
-        "//icons:add_element.svg",
-        "//icons:hide.svg",
-        "//icons:quit.svg",
-        "//icons:settings.svg",
-        "//icons:show.svg",
-        "//icons:cross.svg",
-        "//icons:left_arrow.svg",
-        "//icons:add.svg"
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_full.tflite",
+        "@mediapipe//mediapipe/modules/palm_detection:palm_detection_lite.tflite",
     ],
-    moc_hdrs = ["main_window.h"],
-    deps = [
-        "//jesture/components:camera_feed",
-        "//jesture/jesturepipe:settings",
-        "//jesture/jesturepipe:controller",
-        "@qt//:qt_core",
-        "@qt//:qt_gui",
-        "@qt//:qt_multimedia",
-        "@qt//:qt_widgets",
+    files = [
+        "mediapipe/modules/palm_detection:palm_detection_full.tflite",
     ],
 )
 
-cc_binary(
+app(
     name = "jesture",
-    srcs = ["jesture.cc"],
-    data = [
-        "//icons:settings.svg",
-    ],
-    deps = [
-        ":config_manager",
-        ":main_window",
-        "//jesture/jesturepipe:controller",
-        "//jesture/jesturepipe:settings",
-        "@bazel_tools//tools/cpp/runfiles",
-        "@qt//:qt_core",
-        "@qt//:qt_widgets",
+    bin_srcs = [
+        "jesture.cc",
     ],
 )

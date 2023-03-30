@@ -28,7 +28,6 @@ def _qt_moc_impl(ctx):
     )
 
     return [OutputGroupInfo(out = depset([out_file]))]
-    # pass
 
 qt_moc = rule(
     implementation = _qt_moc_impl,
@@ -50,6 +49,65 @@ qt_moc = rule(
     },
     toolchains = ["@qt//:toolchain_type"],
 )
+
+# def _qt_qrc_impl(ctx):
+#     out = ctx.outputs.out
+
+#     content = "<RCC>\n  <qresource prefix=\\\"/\\\">"
+#     for f in ctx.files.files:
+#         content += "\n <file>%s</file>" % f.path
+#     content += "\n </qresource>\n</RCC>"
+
+#     cmd = ["echo", '"%s"' % content, ">", out.path]
+
+#     exec_requirements = {}
+#     for elem in ctx.attr.tags:
+#         exec_requirements[elem] = "1"
+
+#     ctx.actions.run_shell(
+#         command = " ".join(cmd),
+#         outputs = [out],
+#         execution_requirements = exec_requirements,
+#     )
+
+#     return [OutputGroupInfo(qrc = depset([out]))]
+
+# qt_qrc = rule(
+#     implementation = _qt_qrc_impl,
+#     attrs = {
+#         "files": attr.label_list(
+#             doc = "Files to list in the qrc file",
+#         ),
+#         "out": attr.output(),
+#     },
+# )
+
+def qt_qrc(
+        name,
+        files,
+        out = None,
+        data = []):
+    script_name = name + "_qrc_sh"
+    native.sh_binary(
+        name = script_name,
+        srcs = ["//qt:qrc.sh"],
+        deps = [
+            "@bazel_tools//tools/bash/runfiles",
+        ],
+        data = data,
+    )
+
+    native.genrule(
+        name = name,
+        srcs = data,
+        outs = [out],
+        cmd = (
+            ("$(location %s)" % script_name) + " " +
+            "$@" + " " +
+            (" ".join(files))
+        ),
+        tools = [script_name],
+    )
 
 def qt_cc_library(
         name,
