@@ -11,11 +11,15 @@ exports_files([
     "cross.svg",
     "left_arrow.svg",
     "add.svg",
+    "Jesture.svg",
 ])
 
 qt_resource(
     name = "icons",
     files = {
+        "jesture.png": ":Jesture.png",
+        "jesture.svg": ":Jesture.svg",
+        "jesture.ico": ":Jesture.ico",
         "settings.svg": ":settings.svg",
         "show.svg": ":show.svg",
         "hide.svg": ":hide.svg",
@@ -25,5 +29,5 @@ qt_resource(
         "left_arrow.svg": ":left_arrow.svg",
         "add.svg": ":add.svg",
     },
-    prefix = "/jesture/icons",
+    # prefix = "/jesture/icons",
 )

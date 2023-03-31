@@ -1,4 +1,4 @@
-load("//qt:qt.bzl", "qt_cc_binary", "qt_resource")
+load("//qt:qt.bzl", "qt_cc_binary", "qt_cc_library", "qt_resource")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,6 +14,15 @@ qt_resource(
     prefix = "/jesture",
 )
 
+qt_cc_library(
+    name = "main_window",
+    srcs = ["main_window.cc"],
+    moc_hdrs = ["main_window.h"],
+    deps = [
+        "@qt//:qt_widgets",
+    ],
+)
+
 qt_cc_binary(
     name = "jesture",
     srcs = ["jesture.cc"],
@@ -21,8 +30,9 @@ qt_cc_binary(
         "QT_PLUGIN_PATH": "/usr/lib/x86_64-linux-gnu/qt6/plugins",
     },
     deps = [
-        ":jesture_qml",
+        ":main_window",
         "//icons",
+        "@com_github_google_glog//:glog",
         "@qt//:qt_multimedia",
         "@qt//:qt_qml",
         "@qt//:qt_qml_workerscript",

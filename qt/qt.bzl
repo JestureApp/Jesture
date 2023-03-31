@@ -57,7 +57,7 @@ def _qt_qrc_impl(ctx):
 
     prefix = ctx.attr.prefix
 
-    content = "<RCC>\n\t<qresource prefix=\\\"%s\\\">" % prefix
+    content = "<RCC version=\\\"1.0\\\">\n\t<qresource prefix=\\\"%s\\\">" % prefix
 
     inputs = []
 
@@ -78,6 +78,7 @@ def _qt_qrc_impl(ctx):
 
         inputs.append(input)
 
+        # content += "\n\t\t<file>%s</file>" % prefixed_file_path
         content += "\n\t\t<file alias=\\\"%s\\\">%s</file>" % (alias, prefixed_file_path)
 
     content += "\n\t</qresource>\n</RCC>"
