@@ -29,7 +29,8 @@ cc_library(
     hdrs = ["resource_manager.h"],
     deps = [
         "//icons",
-        "@qt//:qt_widgets",
+        "@qt//:qt_gui",
+        "@qt//:qt_multimedia",
     ],
 )
 
@@ -45,6 +46,8 @@ qt_cc_binary(
     deps = [
         ":main_window",
         ":resource_manager",
+        "//jesture/jesturepipe:controller",
+        "@com_github_gflags_gflags//:gflags",
         "@com_github_google_glog//:glog",
         "@qt//:qt_multimedia",
         "@qt//:qt_widgets",

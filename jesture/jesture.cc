@@ -1,10 +1,13 @@
+#include <gflags/gflags.h>
+
 #include <QtCore>
-#include <QtWidgets>
+#include <QtWidgets/QApplication>
 #include <iostream>
 
 #include "glog/logging.h"
 #include "jesture/main_window.h"
 #include "jesture/resource_manager.h"
+#include "jesturepipe/controller.h"
 
 using namespace jesture;
 
@@ -13,12 +16,19 @@ void setupMainWindow(MainWindow *window, QApplication *app,
                      ResourceManager *resourceManager);
 
 int main(int argc, char *argv[]) {
+    FLAGS_alsologtostderr = 1;
     google::InitGoogleLogging(argv[0]);
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
 
     ResourceManager resourceManager(argv[0]);
 
+    auto pipeline_config = JesturePipeController::makeConfig(resourceManager);
+
+    LOG(INFO) << "Starting application";
     QApplication app(argc, argv);
     setupApp(&app);
+
+    auto pipeline = JesturePipeController(pipeline_config, &app);
 
     auto window = new MainWindow();
     setupMainWindow(window, &app, &resourceManager);
@@ -35,7 +45,10 @@ void printResources() {
     }
 }
 
-void setupApp(QApplication *app) { app->setApplicationName("Jesture"); }
+void setupApp(QApplication *app) {
+    app->setApplicationName("Jesture");
+    app->setOrganizationName("Jesture");
+}
 
 void setupMainWindow(MainWindow *window, QApplication *app,
                      ResourceManager *resourceManager) {

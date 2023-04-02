@@ -1,5 +1,6 @@
 #include "jesture/resource_manager.h"
 
+#include <QImageReader>
 #include <iostream>
 
 namespace jesture {
@@ -21,7 +22,33 @@ ResourceManager::ResourceManager(char *argv0) {
     ensureExists(palm_detection_lite_path);
 }
 
-QIcon ResourceManager::getIcon(QString path) {
+QIcon ResourceManager::applicationWindowIcon() const {
+    if (supportsImageFormat("svg"))
+        return getIcon(":/jesture/icons/jesture.svg");
+
+    if (supportsImageFormat("ico"))
+        return getIcon(":/jesture/icons/jesture.ico");
+
+    qFatal("Cannot load %s", ":/jesture/icons/jesture.*");
+}
+
+fs::path ResourceManager::handLandmarkFullPath() const {
+    return hand_landmark_full_path;
+}
+
+fs::path ResourceManager::handLandmarkLitePath() const {
+    return hand_landmark_lite_path;
+}
+
+fs::path ResourceManager::palmDetectionFullPath() const {
+    return palm_detection_full_path;
+}
+
+fs::path ResourceManager::palmDetectionLitePath() const {
+    return palm_detection_lite_path;
+}
+
+QIcon ResourceManager::getIcon(QString path) const {
     QImageReader reader(path);
 
     QImage image = reader.read();
@@ -37,21 +64,11 @@ QIcon ResourceManager::getIcon(QString path) {
     return icon;
 }
 
-bool ResourceManager::supportsImageFormat(std::string format) {
+bool ResourceManager::supportsImageFormat(std::string format) const {
     return QImageReader::supportedImageFormats().contains(format.c_str());
 }
 
-QIcon ResourceManager::applicationWindowIcon() {
-    if (supportsImageFormat("svg"))
-        return getIcon(":/jesture/icons/jesture.svg");
-
-    if (supportsImageFormat("ico"))
-        return getIcon(":/jesture/icons/jesture.ico");
-
-    qFatal("Cannot load %s", ":/jesture/icons/jesture.*");
-}
-
-void ResourceManager::ensureExists(fs::path path) {
+void ResourceManager::ensureExists(fs::path path) const {
     if (!fs::exists(path)) qFatal("Could not find file %s", path.c_str());
 }
 

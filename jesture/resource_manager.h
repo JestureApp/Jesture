@@ -1,7 +1,7 @@
 #ifndef JESTURE_RESOURCE_MANAGER_H
 #define JESTURE_RESOURCE_MANAGER_H
 
-#include <QtWidgets>
+#include <QIcon>
 #include <filesystem>
 
 namespace jesture {
@@ -11,12 +11,16 @@ class ResourceManager {
    public:
     ResourceManager(char *argv0);
 
-    QIcon applicationWindowIcon();
+    QIcon applicationWindowIcon() const;
+    fs::path handLandmarkFullPath() const;
+    fs::path handLandmarkLitePath() const;
+    fs::path palmDetectionFullPath() const;
+    fs::path palmDetectionLitePath() const;
 
    private:
-    QIcon getIcon(QString path);
-    bool supportsImageFormat(std::string format);
-    void ensureExists(fs::path path);
+    QIcon getIcon(QString path) const;
+    bool supportsImageFormat(std::string format) const;
+    void ensureExists(fs::path path) const;
 
     fs::path hand_landmark_full_path;
     fs::path hand_landmark_lite_path;
