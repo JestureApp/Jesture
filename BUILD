@@ -34,6 +34,12 @@ pkg_files(
     prefix = "/opt/jesture",
 )
 
+pkg_files(
+    name = "jesture_linux_models",
+    srcs = ["//jesture:models"],
+    prefix = "/opt/jesture/models",
+)
+
 pkg_mklink(
     name = "jesture_linux_usr_bin",
     link_name = "/usr/bin/jesture",
@@ -44,6 +50,7 @@ pkg_tar(
     name = "jesture_linux_tar",
     srcs = [
         ":jesture_linux_bin",
+        ":jesture_linux_models",
         ":jesture_linux_usr_bin",
     ],
     package_file_name = "{product_name}-{version}-{arch}-linux.tar",

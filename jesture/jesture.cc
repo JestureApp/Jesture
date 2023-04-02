@@ -15,7 +15,7 @@ void setupMainWindow(MainWindow *window, QApplication *app,
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
-    ResourceManager resourceManager;
+    ResourceManager resourceManager(argv[0]);
 
     QApplication app(argc, argv);
     setupApp(&app);
