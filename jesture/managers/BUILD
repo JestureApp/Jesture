@@ -10,3 +10,13 @@ cc_library(
         "@qt//:qt_multimedia",
     ],
 )
+
+cc_library(
+    name = "camera",
+    srcs = ["camera.cc"],
+    hdrs = ["camera.h"],
+    deps = [
+        "//icons",
+        "@qt//:qt_multimedia",
+    ],
+)
