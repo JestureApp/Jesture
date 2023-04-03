@@ -10,9 +10,8 @@ void check_status(const char* op, absl::Status status) {
 }
 
 jesturepipe::JesturePipeConfig JesturePipeController::makeConfig(
-    const ResourceManager& resourceManager) {
-    return {.hand_landmark_model_full_path =
-                resourceManager.handLandmarkFullPath()};
+    const Resources& resources) {
+    return {.hand_landmark_model_full_path = resources.handLandmarkFullPath()};
 }
 
 JesturePipeController::JesturePipeController(

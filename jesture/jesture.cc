@@ -6,23 +6,23 @@
 
 #include "glog/logging.h"
 #include "jesture/main_window.h"
-#include "jesture/resource_manager.h"
+#include "jesture/managers/resources.h"
 #include "jesturepipe/controller.h"
 
 using namespace jesture;
 
 void setupApp(QApplication *app);
 void setupMainWindow(MainWindow *window, QApplication *app,
-                     ResourceManager *resourceManager);
+                     Resources *resourceManager);
 
 int main(int argc, char *argv[]) {
     FLAGS_alsologtostderr = 1;
     google::InitGoogleLogging(argv[0]);
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-    ResourceManager resourceManager(argv[0]);
+    Resources resources(argv[0]);
 
-    auto pipeline_config = JesturePipeController::makeConfig(resourceManager);
+    auto pipeline_config = JesturePipeController::makeConfig(resources);
 
     LOG(INFO) << "Starting application";
     QApplication app(argc, argv);
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     auto pipeline = JesturePipeController(pipeline_config, &app);
 
     auto window = new MainWindow();
-    setupMainWindow(window, &app, &resourceManager);
+    setupMainWindow(window, &app, &resources);
 
     window->show();
 
@@ -51,7 +51,7 @@ void setupApp(QApplication *app) {
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,
-                     ResourceManager *resourceManager) {
+                     Resources *resourceManager) {
     QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
 
     window->setFixedSize(1280, 720);

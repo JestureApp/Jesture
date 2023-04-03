@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "jesture/resource_manager.h"
+#include "jesture/managers/resources.h"
 #include "jesturepipe/jesturepipe.h"
 
 namespace jesture {
@@ -12,7 +12,7 @@ class JesturePipeController : public QObject {
     Q_OBJECT
    public:
     static jesturepipe::JesturePipeConfig makeConfig(
-        const ResourceManager& resourceManager);
+        const Resources& resources);
 
     explicit JesturePipeController(const jesturepipe::JesturePipeConfig& config,
                                    QObject* parent = nullptr);

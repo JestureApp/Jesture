@@ -1,4 +1,4 @@
-#include "jesture/resource_manager.h"
+#include "jesture/managers/resources.h"
 
 #include <QImageReader>
 #include <iostream>
@@ -6,7 +6,7 @@
 namespace jesture {
 namespace fs = std::filesystem;
 
-ResourceManager::ResourceManager(char *argv0) {
+Resources::Resources(char *argv0) {
     fs::path dir = fs::path(argv0).parent_path();
 
     hand_landmark_full_path = dir / "models" / "hand_landmark_full.tflite";
@@ -22,7 +22,7 @@ ResourceManager::ResourceManager(char *argv0) {
     ensureExists(palm_detection_lite_path);
 }
 
-QIcon ResourceManager::applicationWindowIcon() const {
+QIcon Resources::applicationWindowIcon() const {
     if (supportsImageFormat("svg"))
         return getIcon(":/jesture/icons/jesture.svg");
 
@@ -32,23 +32,23 @@ QIcon ResourceManager::applicationWindowIcon() const {
     qFatal("Cannot load %s", ":/jesture/icons/jesture.*");
 }
 
-fs::path ResourceManager::handLandmarkFullPath() const {
+fs::path Resources::handLandmarkFullPath() const {
     return hand_landmark_full_path;
 }
 
-fs::path ResourceManager::handLandmarkLitePath() const {
+fs::path Resources::handLandmarkLitePath() const {
     return hand_landmark_lite_path;
 }
 
-fs::path ResourceManager::palmDetectionFullPath() const {
+fs::path Resources::palmDetectionFullPath() const {
     return palm_detection_full_path;
 }
 
-fs::path ResourceManager::palmDetectionLitePath() const {
+fs::path Resources::palmDetectionLitePath() const {
     return palm_detection_lite_path;
 }
 
-QIcon ResourceManager::getIcon(QString path) const {
+QIcon Resources::getIcon(QString path) const {
     QImageReader reader(path);
 
     QImage image = reader.read();
@@ -64,11 +64,11 @@ QIcon ResourceManager::getIcon(QString path) const {
     return icon;
 }
 
-bool ResourceManager::supportsImageFormat(std::string format) const {
+bool Resources::supportsImageFormat(std::string format) const {
     return QImageReader::supportedImageFormats().contains(format.c_str());
 }
 
-void ResourceManager::ensureExists(fs::path path) const {
+void Resources::ensureExists(fs::path path) const {
     if (!fs::exists(path)) qFatal("Could not find file %s", path.c_str());
 }
 

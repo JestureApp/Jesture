@@ -1,5 +1,5 @@
-#ifndef JESTURE_RESOURCE_MANAGER_H
-#define JESTURE_RESOURCE_MANAGER_H
+#ifndef JESTURE_MANAGERS_RESOURCES_H
+#define JESTURE_MANAGERS_RESOURCES_H
 
 #include <QIcon>
 #include <filesystem>
@@ -7,9 +7,9 @@
 namespace jesture {
 namespace fs = std::filesystem;
 
-class ResourceManager {
+class Resources {
    public:
-    ResourceManager(char *argv0);
+    Resources(char *argv0);
 
     QIcon applicationWindowIcon() const;
     fs::path handLandmarkFullPath() const;
@@ -29,4 +29,4 @@ class ResourceManager {
 };
 }  // namespace jesture
 
-#endif  // JESTURE_RESOURCE_MANAGER_H
+#endif  // JESTURE_MANAGERS_RESOURCES_H

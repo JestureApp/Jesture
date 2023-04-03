@@ -23,17 +23,6 @@ qt_cc_library(
     ],
 )
 
-cc_library(
-    name = "resource_manager",
-    srcs = ["resource_manager.cc"],
-    hdrs = ["resource_manager.h"],
-    deps = [
-        "//icons",
-        "@qt//:qt_gui",
-        "@qt//:qt_multimedia",
-    ],
-)
-
 qt_cc_binary(
     name = "jesture",
     srcs = ["jesture.cc"],
@@ -45,8 +34,8 @@ qt_cc_binary(
     },
     deps = [
         ":main_window",
-        ":resource_manager",
         "//jesture/jesturepipe:controller",
+        "//jesture/managers:resources",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_google_glog//:glog",
         "@qt//:qt_multimedia",
