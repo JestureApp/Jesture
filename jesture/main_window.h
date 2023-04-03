@@ -3,13 +3,15 @@
 
 #include <QtWidgets>
 
+#include "jesture/managers/camera.h"
+
 namespace jesture {
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
    public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(Camera* camera, QWidget* parent = nullptr);
 
    signals:
     void quit();

@@ -10,7 +10,7 @@ class Config : public QObject {
     Q_OBJECT
 
    public:
-    Config(QObject *parent = nullptr);
+    explicit Config(QObject *parent = nullptr);
 
     QCameraDevice cameraDevice();
     void setCameraDevice(QCameraDevice camera_device);

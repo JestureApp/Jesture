@@ -10,10 +10,15 @@ class Camera : public QCamera {
     Q_OBJECT
 
    public:
-    Camera(QObject* parent = nullptr);
+    explicit Camera(QObject* parent = nullptr);
+
+    bool shouldReflect() const;
 
    public slots:
     void setDevice(const QCameraDevice& device);
+
+   signals:
+    void deviceChanged(const QCameraDevice& device);
 };
 
 }  // namespace jesture

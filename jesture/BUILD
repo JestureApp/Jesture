@@ -19,6 +19,8 @@ qt_cc_library(
     srcs = ["main_window.cc"],
     moc_hdrs = ["main_window.h"],
     deps = [
+        "//jesture/components:pipeline_view",
+        "//jesture/managers:camera",
         "@qt//:qt_widgets",
     ],
 )

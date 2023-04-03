@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
     auto pipeline = JesturePipeController(pipeline_config, &app);
 
-    auto window = new MainWindow();
+    auto window = new MainWindow(camera);
     setupMainWindow(window, &app, &resources);
 
     window->show();
@@ -91,6 +91,7 @@ void setupMainWindow(MainWindow *window, QApplication *app,
                      Resources *resourceManager) {
     QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
 
+    // TODO: remove this when sizing is fixed
     window->setFixedSize(1280, 720);
 
     window->setWindowIcon(resourceManager->applicationWindowIcon());
