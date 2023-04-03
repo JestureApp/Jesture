@@ -35,6 +35,8 @@ qt_cc_binary(
     deps = [
         ":main_window",
         "//jesture/jesturepipe:controller",
+        "//jesture/managers:camera",
+        "//jesture/managers:config",
         "//jesture/managers:resources",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_google_glog//:glog",

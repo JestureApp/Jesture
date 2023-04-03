@@ -6,12 +6,15 @@
 
 #include "glog/logging.h"
 #include "jesture/main_window.h"
+#include "jesture/managers/camera.h"
+#include "jesture/managers/config.h"
 #include "jesture/managers/resources.h"
 #include "jesturepipe/controller.h"
 
 using namespace jesture;
 
 void setupApp(QApplication *app);
+void setupConfig(Config *config, QApplication *app);
 void setupMainWindow(MainWindow *window, QApplication *app,
                      Resources *resourceManager);
 
@@ -27,6 +30,11 @@ int main(int argc, char *argv[]) {
     LOG(INFO) << "Starting application";
     QApplication app(argc, argv);
     setupApp(&app);
+
+    auto config = new Config(&app);
+    setupConfig(config, &app);
+
+    auto camera = new Camera(&app);
 
     auto pipeline = JesturePipeController(pipeline_config, &app);
 
@@ -48,6 +56,11 @@ void printResources() {
 void setupApp(QApplication *app) {
     app->setApplicationName("Jesture");
     app->setOrganizationName("Jesture");
+}
+
+void setupConfig(Config *config, QApplication *app) {
+    QObject::connect(app, &QCoreApplication::aboutToQuit, config,
+                     &Config::save);
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,

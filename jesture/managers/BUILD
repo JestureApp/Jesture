@@ -1,3 +1,5 @@
+load("//qt:qt.bzl", "qt_cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -11,10 +13,19 @@ cc_library(
     ],
 )
 
-cc_library(
+qt_cc_library(
+    name = "config",
+    srcs = ["config.cc"],
+    moc_hdrs = ["config.h"],
+    deps = [
+        "@qt//:qt_core",
+    ],
+)
+
+qt_cc_library(
     name = "camera",
     srcs = ["camera.cc"],
-    hdrs = ["camera.h"],
+    moc_hdrs = ["camera.h"],
     deps = [
         "//icons",
         "@qt//:qt_multimedia",
