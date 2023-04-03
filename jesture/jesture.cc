@@ -11,6 +11,10 @@
 #include "jesture/managers/resources.h"
 #include "jesturepipe/controller.h"
 
+// FLAGS
+DEFINE_bool(silent, true, "Do not log any information to stderr");
+DEFINE_bool(config, true, "Whether or not to load config");
+
 using namespace jesture;
 
 void setupApp(QApplication *app);
@@ -18,11 +22,18 @@ void setupConfig(Config *config, QApplication *app);
 void setupMainWindow(MainWindow *window, QApplication *app,
                      Resources *resourceManager);
 
+void defaultFlagValues() {
+    FLAGS_silent = false;
+    FLAGS_config = true;
+}
+
 int main(int argc, char *argv[]) {
-    FLAGS_alsologtostderr = 1;
     google::InitGoogleLogging(argv[0]);
+
+    defaultFlagValues();
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
+    FLAGS_alsologtostderr = FLAGS_silent ? 0 : 1;
     Resources resources(argv[0]);
 
     auto pipeline_config = JesturePipeController::makeConfig(resources);
@@ -59,8 +70,12 @@ void setupApp(QApplication *app) {
 }
 
 void setupConfig(Config *config, QApplication *app) {
-    QObject::connect(app, &QCoreApplication::aboutToQuit, config,
-                     &Config::save);
+    if (FLAGS_config) {
+        config->load();
+
+        QObject::connect(app, &QCoreApplication::aboutToQuit, config,
+                         &Config::save);
+    }
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,
