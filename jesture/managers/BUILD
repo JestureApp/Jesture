@@ -19,6 +19,7 @@ qt_cc_library(
     moc_hdrs = ["config.h"],
     deps = [
         "@qt//:qt_core",
+        "@qt//:qt_multimedia",
     ],
 )
 

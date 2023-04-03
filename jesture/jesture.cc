@@ -19,6 +19,7 @@ using namespace jesture;
 
 void setupApp(QApplication *app);
 void setupConfig(Config *config, QApplication *app);
+void setupCamera(Camera *camera, Config *config);
 void setupMainWindow(MainWindow *window, QApplication *app,
                      Resources *resourceManager);
 
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
     setupConfig(config, &app);
 
     auto camera = new Camera(&app);
+    setupCamera(camera, config);
 
     auto pipeline = JesturePipeController(pipeline_config, &app);
 
@@ -76,6 +78,13 @@ void setupConfig(Config *config, QApplication *app) {
         QObject::connect(app, &QCoreApplication::aboutToQuit, config,
                          &Config::save);
     }
+}
+
+void setupCamera(Camera *camera, Config *config) {
+    camera->setDevice(config->cameraDevice());
+
+    QObject::connect(config, &Config::cameraDeviceChanged, camera,
+                     &Camera::setDevice);
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,
