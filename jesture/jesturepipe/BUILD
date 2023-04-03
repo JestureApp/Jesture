@@ -7,10 +7,12 @@ qt_cc_library(
     srcs = ["controller.cc"],
     moc_hdrs = ["controller.h"],
     deps = [
+        "//jesture/managers:camera",
         "//jesture/managers:resources",
         "@com_github_google_glog//:glog",
         "@com_google_absl//absl/status",
         "@jesturepipe//jesturepipe",
         "@qt//:qt_core",
+        "@qt//:qt_multimedia",
     ],
 )

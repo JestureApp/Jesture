@@ -1,5 +1,7 @@
 #include "jesture/jesturepipe/controller.h"
 
+#include <QVideoSink>
+
 #include "absl/status/status.h"
 #include "glog/logging.h"
 
@@ -15,9 +17,22 @@ jesturepipe::JesturePipeConfig JesturePipeController::makeConfig(
 }
 
 JesturePipeController::JesturePipeController(
-    const jesturepipe::JesturePipeConfig& config, QObject* parent)
-    : QObject(parent) {
+    Camera* camera, const jesturepipe::JesturePipeConfig& config,
+    QObject* parent)
+    : QObject(parent), camera(camera) {
+    auto video_sink = new QVideoSink(this);
+
+    QObject::connect(video_sink, &QVideoSink::videoFrameChanged, this,
+                     &JesturePipeController::processVideoFrame);
+
+    camera->captureSession()->addVideoSink(video_sink);
+
     LOG(INFO) << "Initializing pipeline";
     check_status("Pipeline initialization", pipeline.Initialize(config));
 }
+
+void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
+    // TODO
+}
+
 }  // namespace jesture

@@ -7,9 +7,8 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     : QGraphicsView(parent), camera(camera) {
     camera_feed = new QGraphicsVideoItem();
 
-    auto capture_session = new QMediaCaptureSession(this);
-    capture_session->setCamera(camera);
-    capture_session->setVideoOutput(camera_feed);
+    auto capture_session = camera->captureSession();
+    capture_session->addVideoSink(camera_feed->videoSink());
 
     scene = new QGraphicsScene(this);
     scene->addItem(camera_feed);

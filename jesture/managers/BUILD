@@ -29,6 +29,7 @@ qt_cc_library(
     moc_hdrs = ["camera.h"],
     deps = [
         "//icons",
+        "//jesture/util:video_capture_session",
         "@qt//:qt_multimedia",
     ],
 )

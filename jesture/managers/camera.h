@@ -4,6 +4,8 @@
 #include <QCamera>
 #include <QObject>
 
+#include "jesture/util/video_capture_session.h"
+
 namespace jesture {
 
 class Camera : public QCamera {
@@ -14,11 +16,16 @@ class Camera : public QCamera {
 
     bool shouldReflect() const;
 
+    VideoCaptureSession* captureSession();
+
    public slots:
     void setDevice(const QCameraDevice& device);
 
    signals:
     void deviceChanged(const QCameraDevice& device);
+
+   private:
+    VideoCaptureSession* capture_session;
 };
 
 }  // namespace jesture

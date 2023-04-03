@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "jesture/managers/camera.h"
 #include "jesture/managers/resources.h"
 #include "jesturepipe/jesturepipe.h"
 
@@ -14,12 +15,17 @@ class JesturePipeController : public QObject {
     static jesturepipe::JesturePipeConfig makeConfig(
         const Resources& resources);
 
-    explicit JesturePipeController(const jesturepipe::JesturePipeConfig& config,
+    explicit JesturePipeController(Camera* camera,
+                                   const jesturepipe::JesturePipeConfig& config,
                                    QObject* parent = nullptr);
 
     // ~JesturePipeController() noexcept;
 
+   private slots:
+    void processVideoFrame(const QVideoFrame& video_frame);
+
    private:
+    Camera* camera;
     jesturepipe::JesturePipe pipeline;
 };
 }  // namespace jesture
