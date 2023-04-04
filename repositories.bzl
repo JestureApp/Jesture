@@ -40,8 +40,14 @@ def jesture_repositories():
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "406e73c824f2578390445171b1071be9d8167c16",
+        commit = "c2927a00e834a31270a4025daca1e08c2fbccf6c",
     )
+
+    # maybe(
+    #     native.local_repository,
+    #     name = "jesturepipe",
+    #     path = "../JesturePipe",
+    # )
 
     http_archive(
         name = "com_github_gflags_gflags",

@@ -49,12 +49,14 @@ int main(int argc, char *argv[]) {
     auto camera = new Camera(&app);
     setupCamera(camera, config);
 
-    auto pipeline = JesturePipeController(camera, pipeline_config, &app);
+    auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
 
     auto window = new MainWindow(camera);
     setupMainWindow(window, &app, &resources);
 
     window->show();
+
+    pipeline->start(false);
 
     return app.exec();
 }
