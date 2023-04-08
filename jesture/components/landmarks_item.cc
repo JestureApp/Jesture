@@ -6,6 +6,8 @@ namespace jesture {
 
 LandmarksItem::LandmarksItem(QGraphicsItem *parent)
     : QGraphicsItem(parent), size(1, 1) {
+    setVisible(false);
+
     valid_timer = new QTimer(this);
     valid_timer->setSingleShot(true);
 

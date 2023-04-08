@@ -20,6 +20,8 @@ class PipelineView : public QGraphicsView {
    public:
     explicit PipelineView(Camera* camera, QWidget* parent = nullptr);
 
+    QSize sizeHint() const override;
+
    public slots:
     void drawLandmarks(std::vector<Landmarks> landmarks);
 

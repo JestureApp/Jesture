@@ -2,10 +2,13 @@
 
 #include <QBrush>
 #include <QPen>
+#include <QSizePolicy>
 
 namespace jesture {
 PipelineView::PipelineView(Camera* camera, QWidget* parent)
     : QGraphicsView(parent), camera(camera) {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     camera_feed = new QGraphicsVideoItem();
 
     QColor landmark_color(Qt::white);
@@ -47,11 +50,14 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     camera->start();
 }
 
+QSize PipelineView::sizeHint() const { return sceneRect().size().toSize(); }
+
 void PipelineView::drawLandmarks(std::vector<Landmarks> landmarks) {
     if (landmarks.size() > 0)
         first_hand_landmarks->updateLandmarks(landmarks[0]);
 
-    if (landmarks.size() > 1) second_hand_landmarks->setVisible(true);
+    if (landmarks.size() > 1)
+        second_hand_landmarks->updateLandmarks(landmarks[1]);
 }
 
 void PipelineView::updateSizes(const QSizeF& size) {
@@ -79,7 +85,8 @@ void PipelineView::updateReflection() {
 }
 
 void PipelineView::resizeEvent(QResizeEvent* event) {
-    fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+    // Will maintain aspect ratio, cropping when necessary
+    fitInView(scene->sceneRect(), Qt::KeepAspectRatioByExpanding);
 
     QGraphicsView::resizeEvent(event);
 }

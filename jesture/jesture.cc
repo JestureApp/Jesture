@@ -101,8 +101,7 @@ void setupMainWindow(MainWindow *window, QApplication *app,
             window->drawLandmarks(landmarks);
         });
 
-    // TODO: remove this when sizing is fixed
-    window->setFixedSize(1280, 720);
+    window->resize(1280, 720);
 
     window->setWindowIcon(resourceManager->applicationWindowIcon());
 }
