@@ -1,11 +1,29 @@
 #include "jesture/components/pipeline_view.h"
 
-#include <QMediaCaptureSession>
+#include <QBrush>
+#include <QPen>
 
 namespace jesture {
 PipelineView::PipelineView(Camera* camera, QWidget* parent)
     : QGraphicsView(parent), camera(camera) {
     camera_feed = new QGraphicsVideoItem();
+
+    QColor landmark_color(Qt::white);
+    landmark_color.setAlpha(256 * 0.75);
+
+    QPen landmark_pen;
+    landmark_pen.setWidth(10);
+    landmark_pen.setBrush(landmark_color);
+
+    QBrush landmark_brush(landmark_color);
+
+    first_hand_landmarks = new LandmarksItem(camera_feed);
+    first_hand_landmarks->setPen(landmark_pen);
+    first_hand_landmarks->setBrush(landmark_brush);
+
+    second_hand_landmarks = new LandmarksItem(camera_feed);
+    second_hand_landmarks->setPen(landmark_pen);
+    second_hand_landmarks->setBrush(landmark_brush);
 
     auto capture_session = camera->captureSession();
     capture_session->addVideoSink(camera_feed->videoSink());
@@ -29,10 +47,20 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     camera->start();
 }
 
+void PipelineView::drawLandmarks(std::vector<Landmarks> landmarks) {
+    if (landmarks.size() > 0)
+        first_hand_landmarks->updateLandmarks(landmarks[0]);
+
+    if (landmarks.size() > 1) second_hand_landmarks->setVisible(true);
+}
+
 void PipelineView::updateSizes(const QSizeF& size) {
     scene->setSceneRect(0, 0, size.width(), size.height());
 
     camera_feed->setSize(scene->sceneRect().size());
+
+    first_hand_landmarks->setSize(scene->sceneRect().size());
+    second_hand_landmarks->setSize(scene->sceneRect().size());
 
     updateReflection();
 

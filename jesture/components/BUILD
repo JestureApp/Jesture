@@ -7,6 +7,8 @@ qt_cc_library(
     srcs = ["pipeline_view.cc"],
     moc_hdrs = ["pipeline_view.h"],
     deps = [
+        ":landmarks_item",
+        "//jesture/jesturepipe:landmarks",
         "//jesture/managers:camera",
         "@qt//:qt_multimedia",
         "@qt//:qt_multimedia_widgets",
@@ -14,14 +16,12 @@ qt_cc_library(
     ],
 )
 
-# qt_cc_library(
-#     name = "camera_feed",
-#     srcs = ["camera_feed.cc"],
-#     moc_hdrs = ["camera_feed.h"],
-#     deps = [
-#         "//jesture/managers:camera",
-#         "@qt//:qt_multimedia",
-#         "@qt//:qt_multimedia_widgets",
-#         "@qt//:qt_widgets",
-#     ],
-# )
+qt_cc_library(
+    name = "landmarks_item",
+    srcs = ["landmarks_item.cc"],
+    moc_hdrs = ["landmarks_item.h"],
+    deps = [
+        "//jesture/jesturepipe:landmarks",
+        "@qt//:qt_widgets",
+    ],
+)

@@ -1,7 +1,5 @@
 #include "jesture/main_window.h"
 
-#include "jesture/components/pipeline_view.h"
-
 namespace jesture {
 
 MainWindow::MainWindow(Camera* camera, QWidget* parent) : QMainWindow(parent) {
@@ -11,10 +9,14 @@ MainWindow::MainWindow(Camera* camera, QWidget* parent) : QMainWindow(parent) {
 
     // content->setLayout(content_layout);
 
-    auto pipeline_view = new PipelineView(camera, this);
+    pipeline_view = new PipelineView(camera, this);
     // content_layout->addWidget(pipeline_view);
 
     setCentralWidget(pipeline_view);
+}
+
+void MainWindow::drawLandmarks(std::vector<Landmarks> landmarks) {
+    pipeline_view->drawLandmarks(landmarks);
 }
 
 }  // namespace jesture

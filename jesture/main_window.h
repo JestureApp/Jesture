@@ -3,6 +3,8 @@
 
 #include <QtWidgets>
 
+#include "jesture/components/pipeline_view.h"
+#include "jesture/jesturepipe/landmarks.h"
 #include "jesture/managers/camera.h"
 
 namespace jesture {
@@ -15,6 +17,12 @@ class MainWindow : public QMainWindow {
 
    signals:
     void quit();
+
+   public slots:
+    void drawLandmarks(std::vector<Landmarks>);
+
+   private:
+    PipelineView* pipeline_view;
 };
 
 }  // namespace jesture

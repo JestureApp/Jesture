@@ -82,7 +82,11 @@ void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
     cv::Mat mat(img.height(), img.width(), CV_8UC(img.depth() / 8),
                 (uchar*)img.bits(), img.bytesPerLine());
 
-    if (camera->shouldReflect()) cv::flip(mat, mat, 1);
+    if (camera->shouldReflect()) {
+        // qDebug() << "flipping frame";
+
+        cv::flip(mat, mat, 1);
+    }
 
     auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
         mediapipe::ImageFormat::SRGB, mat.cols, mat.rows,

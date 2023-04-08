@@ -24,14 +24,14 @@ class JesturePipeController : public QObject {
 
     bool isRunning();
 
-   public slots:
-    void start(bool use_full);
-    void stop();
-
    signals:
     void landmarksReady(
         std::vector<mediapipe::NormalizedLandmarkList> landmarks,
         unsigned long timestamp);
+
+   public slots:
+    void start(bool use_full);
+    void stop();
 
    private slots:
     void processVideoFrame(const QVideoFrame& video_frame);

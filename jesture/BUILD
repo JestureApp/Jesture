@@ -21,6 +21,7 @@ qt_cc_library(
     deps = [
         "//jesture/components:pipeline_view",
         "//jesture/managers:camera",
+        "//jesture/jesturepipe:landmarks",
         "@qt//:qt_widgets",
     ],
 )

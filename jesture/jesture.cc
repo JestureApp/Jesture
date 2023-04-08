@@ -21,6 +21,7 @@ void setupApp(QApplication *app);
 void setupConfig(Config *config, QApplication *app);
 void setupCamera(Camera *camera, Config *config);
 void setupMainWindow(MainWindow *window, QApplication *app,
+                     JesturePipeController *pipeline,
                      Resources *resourceManager);
 
 void defaultFlagValues() {
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
     auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
 
     auto window = new MainWindow(camera);
-    setupMainWindow(window, &app, &resources);
+    setupMainWindow(window, &app, pipeline, &resources);
 
     window->show();
 
@@ -90,8 +91,15 @@ void setupCamera(Camera *camera, Config *config) {
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,
+                     JesturePipeController *pipeline,
                      Resources *resourceManager) {
     QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
+
+    QObject::connect(
+        pipeline, &JesturePipeController::landmarksReady, window,
+        [window](std::vector<Landmarks> landmarks, unsigned long timestamp) {
+            window->drawLandmarks(landmarks);
+        });
 
     // TODO: remove this when sizing is fixed
     window->setFixedSize(1280, 720);

@@ -20,3 +20,11 @@ qt_cc_library(
         "@qt//:qt_multimedia",
     ],
 )
+
+cc_library(
+    name = "landmarks",
+    hdrs = ["landmarks.h"],
+    deps = [
+        "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+    ],
+)
