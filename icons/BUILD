@@ -6,6 +6,7 @@ exports_files([
     "jesture.svg",
     "jesture.ico",
     "settings.svg",
+    "settings.png",
 ])
 
 qt_resource(
@@ -14,6 +15,7 @@ qt_resource(
         "jesture.svg": ":jesture.svg",
         "jesture.ico": ":jesture.ico",
         "settings.svg": ":settings.svg",
+        "settings.png": ":settings.png",
     },
     prefix = "/jesture/icons",
 )

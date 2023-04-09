@@ -6,6 +6,9 @@ cc_library(
     name = "resources",
     srcs = ["resources.cc"],
     hdrs = ["resources.h"],
+    copts = select({
+        "//conditions:default": ["-fPIC"],
+    }),
     deps = [
         "//icons",
         "@qt//:qt_gui",
