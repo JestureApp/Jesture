@@ -12,6 +12,8 @@ class Resources {
     Resources(char *argv0);
 
     QIcon applicationWindowIcon() const;
+    QIcon settingsIcon() const;
+
     fs::path handLandmarkFullPath() const;
     fs::path handLandmarkLitePath() const;
     fs::path palmDetectionFullPath() const;

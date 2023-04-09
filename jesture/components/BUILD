@@ -25,3 +25,12 @@ qt_cc_library(
         "@qt//:qt_widgets",
     ],
 )
+
+qt_cc_library(
+    name = "sidebar",
+    srcs = ["sidebar.cc"],
+    moc_hdrs = ["sidebar.h"],
+    deps = [
+        "@qt//:qt_widgets",
+    ]
+)

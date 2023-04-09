@@ -2,17 +2,33 @@
 
 namespace jesture {
 
-MainWindow::MainWindow(Camera* camera, QWidget* parent) : QMainWindow(parent) {
-    // auto content = new QWidget(this);
-    // auto content_layout = new QStackedLayout(content);
-    // content_layout->setStackingMode(QStackedLayout::StackAll);
+MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
+    : QMainWindow(parent) {
+    auto main = new QWidget(this);
 
-    // content->setLayout(content_layout);
+    auto main_layout = new QHBoxLayout(main);
+    main_layout->setSpacing(0);
+    main_layout->setContentsMargins(0, 0, 0, 0);
+    main->setLayout(main_layout);
+
+    auto sidebar = new Sidebar(this);
+    main_layout->addWidget(sidebar);
+
+    sidebar->createItem(resources->settingsIcon(), "Settings");
+
+    auto content = new QWidget(main);
+    main_layout->addWidget(content);
+
+    auto content_layout = new QStackedLayout(content);
+    content_layout->setSpacing(0);
+    content_layout->setContentsMargins(0, 0, 0, 0);
+    content->setLayout(content_layout);
 
     pipeline_view = new PipelineView(camera, this);
-    // content_layout->addWidget(pipeline_view);
+    pipeline_view->setContentsMargins(0, 0, 0, 0);
+    content_layout->addWidget(pipeline_view);
 
-    setCentralWidget(pipeline_view);
+    setCentralWidget(main);
 }
 
 void MainWindow::drawLandmarks(std::vector<Landmarks> landmarks) {

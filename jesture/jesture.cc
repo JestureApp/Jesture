@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 
     auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
 
-    auto window = new MainWindow(camera);
+    auto window = new MainWindow(camera, &resources);
     setupMainWindow(window, &app, pipeline, &resources);
 
     window->show();

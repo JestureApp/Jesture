@@ -4,8 +4,10 @@
 #include <QtWidgets>
 
 #include "jesture/components/pipeline_view.h"
+#include "jesture/components/sidebar.h"
 #include "jesture/jesturepipe/landmarks.h"
 #include "jesture/managers/camera.h"
+#include "jesture/managers/resources.h"
 
 namespace jesture {
 
@@ -13,7 +15,8 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
    public:
-    explicit MainWindow(Camera* camera, QWidget* parent = nullptr);
+    explicit MainWindow(Camera* camera, Resources* resources,
+                        QWidget* parent = nullptr);
 
    signals:
     void quit();

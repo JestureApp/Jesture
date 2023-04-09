@@ -32,6 +32,13 @@ QIcon Resources::applicationWindowIcon() const {
     qFatal("Cannot load %s", ":/jesture/icons/jesture.*");
 }
 
+QIcon Resources::settingsIcon() const {
+    if (supportsImageFormat("svg"))
+        return getIcon(":/jesture/icons/settings.svg");
+
+    qFatal("Cannot load %s", ":/jesture/icons/settings.*");
+}
+
 fs::path Resources::handLandmarkFullPath() const {
     return hand_landmark_full_path;
 }
