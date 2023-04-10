@@ -7,6 +7,7 @@ qt_cc_library(
     srcs = ["controller.cc"],
     moc_hdrs = ["controller.h"],
     deps = [
+        ":gesture",
         "//jesture/managers:camera",
         "//jesture/managers:resources",
         "@com_github_google_glog//:glog",
@@ -26,5 +27,14 @@ cc_library(
     hdrs = ["landmarks.h"],
     deps = [
         "@mediapipe//mediapipe/framework/formats:landmark_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "gesture",
+    srcs = ["gesture.cc"],
+    hdrs = ["gesture.h"],
+    deps = [
+        "@jesturepipe//jesturepipe/gesture",
     ],
 )

@@ -27,14 +27,55 @@ load("//:repositories.bzl", "jesture_repositories")
 
 jesture_repositories()
 
-load("//:setup0.bzl", "jesture_setup0")
+# SETUP STAGE 1
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+load("@bazel_skylib//lib:versions.bzl", "versions")
+load("@jesture//qt:qt_configure.bzl", "qt_configure")
+load("@jesturepipe//:repositories.bzl", "jesturepipe_repositories")
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
-jesture_setup0()
+bazel_skylib_workspace()
 
-load("//:setup1.bzl", "jesture_setup1")
+rules_pkg_dependencies()
 
-jesture_setup1()
+versions.check(
+    maximum_bazel_version = "5.3.0",
+    minimum_bazel_version = "5.0.0",
+)
 
-load("//:setup2.bzl", "jesture_setup2")
+qt_configure()
 
-jesture_setup2()
+jesturepipe_repositories()
+
+# SETUP STAGE 2
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("@local_config_qt//:local_qt.bzl", "local_qt_base_path")
+load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
+load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@actions//:repositories.bzl", "actions_repositories")
+
+maybe(
+    new_local_repository,
+    name = "qt",
+    build_file = "@jesture//third_party:qt.BUILD",
+    path = local_qt_base_path(),
+)
+
+register_toolchains(
+    "@qt//:qt_local_toolchain",
+)
+
+rules_foreign_cc_dependencies()
+
+protobuf_deps()
+
+tf_workspace3()
+
+actions_repositories()
+
+# SETUP STAGE 3
+load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+
+tf_workspace2()
+
