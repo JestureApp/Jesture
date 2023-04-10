@@ -92,6 +92,7 @@ void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
 
     if (!frame.isValid()) {
         LOG(WARNING) << "invalid frame";
+        return;
     }
 
     // If frame cannot be mapped, skip
@@ -120,7 +121,7 @@ void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
 
     mat.copyTo(input_frame_mat);
 
-    unsigned long timestamp = frame.startTime();
+    unsigned long timestamp = frame_time++;
 
     check_status("Add frame to pipeline",
                  pipeline.AddFrame(std::move(input_frame), timestamp));

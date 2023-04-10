@@ -51,6 +51,7 @@ class JesturePipeController : public QObject {
 
     Camera* camera;
     jesturepipe::JesturePipe pipeline;
+    int frame_time = 0;
 };
 }  // namespace jesture
 
