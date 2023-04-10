@@ -36,6 +36,9 @@ QIcon Resources::settingsIcon() const {
     if (supportsImageFormat("svg"))
         return getIcon(":/jesture/icons/settings.svg");
 
+    if (supportsImageFormat("png"))
+        return getIcon(":/jesture/icons/settings.png");
+
     qFatal("Cannot load %s", ":/jesture/icons/settings.*");
 }
 

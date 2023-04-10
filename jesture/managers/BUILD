@@ -2,10 +2,13 @@ load("//qt:qt.bzl", "qt_cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
+qt_cc_library(
     name = "resources",
     srcs = ["resources.cc"],
     hdrs = ["resources.h"],
+    copts = select({
+        "//conditions:default": ["-fPIC"],
+    }),
     deps = [
         "//icons",
         "@qt//:qt_gui",
@@ -18,6 +21,7 @@ qt_cc_library(
     srcs = ["config.cc"],
     moc_hdrs = ["config.h"],
     deps = [
+        "//jesture/jesturepipe:gesture",
         "@qt//:qt_core",
         "@qt//:qt_multimedia",
     ],

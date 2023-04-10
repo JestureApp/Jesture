@@ -6,5 +6,6 @@
 * qml6-module-qtquick-templates
 * qml6-module-qtmultimedia
 * qt6-multimedia-dev
+* libqt6svg6-dev
 
 # Might need later

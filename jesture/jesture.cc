@@ -20,6 +20,7 @@ using namespace jesture;
 void setupApp(QApplication *app);
 void setupConfig(Config *config, QApplication *app);
 void setupCamera(Camera *camera, Config *config);
+void setupPipeline(JesturePipeController *pipeline, Config *config);
 void setupMainWindow(MainWindow *window, QApplication *app,
                      JesturePipeController *pipeline,
                      Resources *resourceManager);
@@ -45,12 +46,11 @@ int main(int argc, char *argv[]) {
     setupApp(&app);
 
     auto config = new Config(&app);
-    setupConfig(config, &app);
-
     auto camera = new Camera(&app);
-    setupCamera(camera, config);
-
     auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
+    setupPipeline(pipeline, config);
+    setupConfig(config, &app);
+    setupCamera(camera, config);
 
     auto window = new MainWindow(camera, &resources);
     setupMainWindow(window, &app, pipeline, &resources);
@@ -75,12 +75,11 @@ void setupApp(QApplication *app) {
 }
 
 void setupConfig(Config *config, QApplication *app) {
-    if (FLAGS_config) {
-        config->load();
+    config->init(FLAGS_config);
 
+    if (FLAGS_config)
         QObject::connect(app, &QCoreApplication::aboutToQuit, config,
                          &Config::save);
-    }
 }
 
 void setupCamera(Camera *camera, Config *config) {
@@ -88,6 +87,17 @@ void setupCamera(Camera *camera, Config *config) {
 
     QObject::connect(config, &Config::cameraDeviceChanged, camera,
                      &Camera::setDevice);
+}
+
+void setupPipeline(JesturePipeController *pipeline, Config *config) {
+    QObject::connect(config, &Config::gestureChanged, pipeline,
+                     &JesturePipeController::setGesture);
+
+    QObject::connect(config, &Config::gestureRemoved, pipeline,
+                     &JesturePipeController::removeGesture);
+
+    QObject::connect(config, &Config::gesturesCleared, pipeline,
+                     &JesturePipeController::clearGestures);
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,

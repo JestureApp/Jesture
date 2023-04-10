@@ -44,11 +44,16 @@ JesturePipeController::JesturePipeController(
     check_status("Landmark Callback",
                  pipeline.OnLandmarks(std::bind(
                      &JesturePipeController::onLandmarks, this, _1, _2)));
+
+    check_status(
+        "Gesture Recognition Callback",
+        pipeline.OnGestureRecognition(std::bind(
+            &JesturePipeController::onGestureRecognized, this, _1, _2)));
 }
 
 JesturePipeController::~JesturePipeController() { stop(); }
 
-bool JesturePipeController::isRunning() { return pipeline.isRunning(); }
+bool JesturePipeController::isRunning() const { return pipeline.isRunning(); }
 
 void JesturePipeController::start(bool use_full) {
     LOG(INFO) << "Starting pipeline";
@@ -58,6 +63,25 @@ void JesturePipeController::start(bool use_full) {
 void JesturePipeController::stop() {
     LOG(INFO) << "Stopping pipeline";
     check_status("Pipeline stop", pipeline.Stop());
+}
+
+void JesturePipeController::setGesture(int gesture_id, Gesture gesture) {
+    pipeline.SetGesture(gesture_id, gesture.pipe_gesture);
+
+    LOG(INFO) << "Added gesture \"" << gesture.name << "\" with id "
+              << gesture_id;
+}
+
+void JesturePipeController::removeGesture(int gesture_id) {
+    pipeline.RemoveGesture(gesture_id);
+
+    LOG(INFO) << "Removed gesture with id " << gesture_id;
+}
+
+void JesturePipeController::clearGestures() {
+    pipeline.ClearGestures();
+
+    LOG(INFO) << "Cleared gestures";
 }
 
 void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
@@ -106,6 +130,11 @@ void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
 
 absl::Status JesturePipeController::onGestureRecognized(
     int gesture_id, unsigned long timestamp) {
+    LOG(INFO) << "Recognized gesture with id " << gesture_id << " at "
+              << timestamp;
+
+    emit gestureRecognized(gesture_id, timestamp);
+
     return absl::OkStatus();
 }
 

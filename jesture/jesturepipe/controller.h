@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "jesture/jesturepipe/gesture.h"
 #include "jesture/managers/camera.h"
 #include "jesture/managers/resources.h"
 #include "jesturepipe/gesture/gesture.h"
@@ -22,16 +23,20 @@ class JesturePipeController : public QObject {
 
     ~JesturePipeController();
 
-    bool isRunning();
+    bool isRunning() const;
 
    signals:
     void landmarksReady(
         std::vector<mediapipe::NormalizedLandmarkList> landmarks,
         unsigned long timestamp);
+    void gestureRecognized(int gesture_id, unsigned long timestamp);
 
    public slots:
     void start(bool use_full);
     void stop();
+    void setGesture(int gesture_id, Gesture gesture);
+    void removeGesture(int gesture_id);
+    void clearGestures();
 
    private slots:
     void processVideoFrame(const QVideoFrame& video_frame);
