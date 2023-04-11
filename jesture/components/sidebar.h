@@ -2,17 +2,17 @@
 #define JESTURE_COMPONENTS_SIDEBAR_H
 
 #include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <list>
 
 namespace jesture {
 
-class SidebarItem : public QWidget {
+class SidebarItem : public QPushButton {
     Q_OBJECT
    public:
-    SidebarItem(const QIcon& icon, QString name,
-                QSize button_size = QSize(32, 32), QWidget* parent = nullptr);
+    SidebarItem(const QIcon& icon, QString name, QWidget* parent = nullptr);
 
    public slots:
     void setLabelVisible(bool visible);
@@ -22,8 +22,7 @@ class SidebarItem : public QWidget {
     void leaveEvent(QEvent* event) override;
 
    private:
-    QLabel* icon_label;
-    QLabel* label;
+    QString name;
 };
 
 class Sidebar : public QWidget {

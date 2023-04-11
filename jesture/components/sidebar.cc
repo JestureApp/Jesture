@@ -46,23 +46,15 @@ void Sidebar::leaveEvent(QEvent* event) {
     QWidget::leaveEvent(event);
 }
 
-SidebarItem::SidebarItem(const QIcon& icon, QString name, QSize button_size,
-                         QWidget* parent)
-    : QWidget(parent) {
-    auto layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
+SidebarItem::SidebarItem(const QIcon& icon, QString name, QWidget* parent)
+    : QPushButton(icon, "", parent), name(name) {}
 
-    icon_label = new QLabel(this);
-    icon_label->setPixmap(icon.pixmap(button_size));
-    layout->addWidget(icon_label);
-
-    label = new QLabel(name, this);
-    label->setVisible(false);
-    layout->addWidget(label);
+void SidebarItem::setLabelVisible(bool visible) {
+    if (visible)
+        setText(name);
+    else
+        setText("");
 }
-
-void SidebarItem::setLabelVisible(bool visible) { label->setVisible(visible); }
 
 void SidebarItem::enterEvent(QEnterEvent* event) {
     // TODO
