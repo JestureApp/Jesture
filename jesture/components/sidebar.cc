@@ -58,12 +58,12 @@ void SidebarItem::setLabelVisible(bool visible) {
 
 void SidebarItem::enterEvent(QEnterEvent* event) {
     // TODO
-    QWidget::enterEvent(event);
+    QPushButton::enterEvent(event);
 }
 
 void SidebarItem::leaveEvent(QEvent* event) {
     // TODO
-    QWidget::leaveEvent(event);
+    QPushButton::leaveEvent(event);
 }
 
 }  // namespace jesture
