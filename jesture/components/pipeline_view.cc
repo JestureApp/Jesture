@@ -11,22 +11,31 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
 
     camera_feed = new QGraphicsVideoItem();
 
-    QColor landmark_color(Qt::white);
-    landmark_color.setAlpha(256 * 0.75);
+    QColor landmark_color1(69, 213, 249, 255 * 0.75);
+    // QColor landmark_color1(206, 68, 252, 255 * 0.75);
 
-    QPen landmark_pen;
-    landmark_pen.setWidth(10);
-    landmark_pen.setBrush(landmark_color);
+    QPen landmark_pen1;
+    landmark_pen1.setWidth(10);
+    landmark_pen1.setBrush(landmark_color1);
 
-    QBrush landmark_brush(landmark_color);
+    QBrush landmark_brush1(landmark_color1);
 
     first_hand_landmarks = new LandmarksItem(camera_feed);
-    first_hand_landmarks->setPen(landmark_pen);
-    first_hand_landmarks->setBrush(landmark_brush);
+    first_hand_landmarks->setPen(landmark_pen1);
+    first_hand_landmarks->setBrush(landmark_brush1);
+
+    QColor landmark_color2(Qt::white);
+    landmark_color2.setAlpha(256 * 0.75);
+
+    QPen landmark_pen2;
+    landmark_pen2.setWidth(10);
+    landmark_pen2.setBrush(landmark_color2);
+
+    QBrush landmark_brush2(landmark_color2);
 
     second_hand_landmarks = new LandmarksItem(camera_feed);
-    second_hand_landmarks->setPen(landmark_pen);
-    second_hand_landmarks->setBrush(landmark_brush);
+    second_hand_landmarks->setPen(landmark_pen2);
+    second_hand_landmarks->setBrush(landmark_brush2);
 
     auto capture_session = camera->captureSession();
     capture_session->addVideoSink(camera_feed->videoSink());
