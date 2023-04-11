@@ -7,6 +7,7 @@ qt_cc_library(
     srcs = ["controller.cc"],
     moc_hdrs = ["controller.h"],
     deps = [
+        ":action",
         ":gesture",
         "//jesture/managers:camera",
         "//jesture/managers:resources",
@@ -36,5 +37,13 @@ cc_library(
     hdrs = ["gesture.h"],
     deps = [
         "@jesturepipe//jesturepipe/gesture",
+    ],
+)
+
+cc_library(
+    name = "action",
+    hdrs = ["action.h"],
+    deps = [
+        "@jesturepipe//jesturepipe/actions:action",
     ],
 )

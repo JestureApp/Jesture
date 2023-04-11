@@ -5,6 +5,7 @@
 #include <QObject>
 #include <map>
 
+#include "jesture/jesturepipe/action.h"
 #include "jesture/jesturepipe/gesture.h"
 
 namespace jesture {
@@ -18,11 +19,14 @@ class Config : public QObject {
     QCameraDevice cameraDevice() const;
     void setCameraDevice(QCameraDevice camera_device);
 
+   public slots:
     int addGesture(Gesture gesture);
     void removeGesture(int gesture_id);
     void clearGestures();
 
-   public slots:
+    void setAction(int gesture_id, Action action);
+    void removeAction(int gesture_id);
+
     void init(bool from_file);
     void save() const;
 
@@ -36,11 +40,15 @@ class Config : public QObject {
     void gestureRemoved(int gesture_id);
     void gesturesCleared();
 
+    void actionChanged(int gesture_id, Action action);
+    void actionRemoved(int gesture_id);
+
    private:
     int next_gesture_id;
 
     QCameraDevice camera_device;
     std::map<int, Gesture> gestures;
+    std::map<int, Action> actions;
 };
 
 }  // namespace jesture

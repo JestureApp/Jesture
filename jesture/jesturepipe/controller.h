@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "jesture/jesturepipe/action.h"
 #include "jesture/jesturepipe/gesture.h"
 #include "jesture/managers/camera.h"
 #include "jesture/managers/resources.h"
@@ -34,9 +35,13 @@ class JesturePipeController : public QObject {
    public slots:
     void start(bool use_full);
     void stop();
+
     void setGesture(int gesture_id, Gesture gesture);
     void removeGesture(int gesture_id);
     void clearGestures();
+
+    void setAction(int gesture_id, Action action);
+    void removeAction(int gesture_id);
 
    private slots:
     void processVideoFrame(const QVideoFrame& video_frame);

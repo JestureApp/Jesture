@@ -21,6 +21,7 @@ qt_cc_library(
     srcs = ["config.cc"],
     moc_hdrs = ["config.h"],
     deps = [
+        "//jesture/jesturepipe:action",
         "//jesture/jesturepipe:gesture",
         "@qt//:qt_core",
         "@qt//:qt_multimedia",

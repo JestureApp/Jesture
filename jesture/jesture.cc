@@ -98,6 +98,12 @@ void setupPipeline(JesturePipeController *pipeline, Config *config) {
 
     QObject::connect(config, &Config::gesturesCleared, pipeline,
                      &JesturePipeController::clearGestures);
+
+    QObject::connect(config, &Config::actionChanged, pipeline,
+                     &JesturePipeController::setAction);
+
+    QObject::connect(config, &Config::actionRemoved, pipeline,
+                     &JesturePipeController::removeAction);
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,

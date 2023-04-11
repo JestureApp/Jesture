@@ -30,10 +30,23 @@ void Config::removeGesture(int gesture_id) {
 
 void Config::clearGestures() {
     gestures.clear();
+    actions.clear();
 
     next_gesture_id = 0;
 
     emit gesturesCleared();
+}
+
+void Config::setAction(int gesture_id, Action action) {
+    actions[gesture_id] = action;
+
+    emit actionChanged(gesture_id, action);
+}
+
+void Config::removeAction(int gesture_id) {
+    actions.erase(gesture_id);
+
+    emit actionRemoved(gesture_id);
 }
 
 void Config::init(bool from_file) {
@@ -58,15 +71,20 @@ void Config::setToDefaultSettings() {
 void Config::setToDefaultGestures() {
     clearGestures();
 
-    addGesture(Gesture("Stop", jesturepipe::Gesture::Stop()));
+    int stop = addGesture(Gesture("Stop", jesturepipe::Gesture::Stop()));
 
-    addGesture(Gesture("Next", jesturepipe::Gesture::Next()));
+    int next = addGesture(Gesture("Next", jesturepipe::Gesture::Next()));
 
-    addGesture(Gesture("Prev", jesturepipe::Gesture::Prev()));
+    int prev = addGesture(Gesture("Prev", jesturepipe::Gesture::Prev()));
 
-    addGesture(Gesture("Slide Left", jesturepipe::Gesture::SlideLeft()));
+    int slide_left =
+        addGesture(Gesture("Slide Left", jesturepipe::Gesture::SlideLeft()));
 
-    addGesture(Gesture("Slide Right", jesturepipe::Gesture::SlideRight()));
+    int slide_right =
+        addGesture(Gesture("Slide Right", jesturepipe::Gesture::SlideRight()));
+
+    setAction(stop, {.type = actions::action::NoOp(),
+                     .cursor_control = jesturepipe::CursorControl::Toggle});
 }
 
 }  // namespace jesture

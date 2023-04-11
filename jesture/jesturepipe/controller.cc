@@ -84,6 +84,18 @@ void JesturePipeController::clearGestures() {
     LOG(INFO) << "Cleared gestures";
 }
 
+void JesturePipeController::setAction(int gesture_id, Action action) {
+    pipeline.SetAction(gesture_id, action);
+
+    LOG(INFO) << "Added action with id " << gesture_id;
+}
+
+void JesturePipeController::removeAction(int gesture_id) {
+    pipeline.RemoveAction(gesture_id);
+
+    LOG(INFO) << "Removed gesture with id " << gesture_id;
+}
+
 void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
     if (!isRunning()) return;
 

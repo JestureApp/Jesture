@@ -75,7 +75,14 @@ tf_workspace3()
 actions_repositories()
 
 # SETUP STAGE 3
+load("@actions//display:display_configure.bzl", "display_configure")
 load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+
+display_configure()
 
 tf_workspace2()
 
+# SETUP STAGE 4
+load("@display//:local_display.bzl", "display_repositories")
+
+display_repositories()
