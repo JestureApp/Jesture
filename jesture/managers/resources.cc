@@ -22,25 +22,29 @@ Resources::Resources(char *argv0) {
     ensureExists(palm_detection_lite_path);
 }
 
-QIcon Resources::applicationWindowIcon() const {
-    if (supportsImageFormat("svg"))
-        return getIcon(":/jesture/icons/jesture.svg");
+QIcon Resources::application_icon() const {
+    const QString path(":/jesture/icons/jesture");
 
-    if (supportsImageFormat("ico"))
-        return getIcon(":/jesture/icons/jesture.ico");
+    if (supportsImageFormat("svg")) return get_icon(path + ".svg");
 
-    qFatal("Cannot load %s", ":/jesture/icons/jesture.*");
+    if (supportsImageFormat("ico")) return get_icon(path + ".ico");
+
+    qFatal("Failed loading application icon! No known formats matched!");
 }
 
-QIcon Resources::settingsIcon() const {
-    if (supportsImageFormat("svg"))
-        return getIcon(":/jesture/icons/settings.svg");
-
-    if (supportsImageFormat("png"))
-        return getIcon(":/jesture/icons/settings.png");
-
-    qFatal("Cannot load %s", ":/jesture/icons/settings.*");
+QIcon Resources::settings_icon() const {
+    return get_icon_format_agnostic("settings");
 }
+
+QIcon Resources::add_element_icon() const {
+    return get_icon_format_agnostic("add_element");
+}
+
+QIcon Resources::add_icon() const { return get_icon_format_agnostic("add"); }
+
+QIcon Resources::show_icon() const { return get_icon_format_agnostic("show"); }
+
+QIcon Resources::hide_icon() const { return get_icon_format_agnostic("hide"); }
 
 fs::path Resources::handLandmarkFullPath() const {
     return hand_landmark_full_path;
@@ -58,7 +62,7 @@ fs::path Resources::palmDetectionLitePath() const {
     return palm_detection_lite_path;
 }
 
-QIcon Resources::getIcon(QString path) const {
+QIcon Resources::get_icon(QString path) const {
     QImageReader reader(path);
 
     QImage image = reader.read();
@@ -72,6 +76,16 @@ QIcon Resources::getIcon(QString path) const {
     assert(!icon.isNull());
 
     return icon;
+}
+
+QIcon Resources::get_icon_format_agnostic(QString name) const {
+    const QString path(":/jesture/icons/" + name);
+
+    if (supportsImageFormat("svg")) return get_icon(path + ".svg");
+
+    if (supportsImageFormat("png")) return get_icon(path + ".png");
+
+    qFatal("Failed loading icon! No known formats matched!");
 }
 
 bool Resources::supportsImageFormat(std::string format) const {

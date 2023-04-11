@@ -1,7 +1,6 @@
 #ifndef JESTURE_COMPONENTS_SETTINGS_VIEW_H
 #define JESTURE_COMPONENTS_SETTINGS_VIEW_H
 
-#include <QGraphicsView>
 #include <QWidget>
 
 namespace jesture {

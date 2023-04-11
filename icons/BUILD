@@ -7,6 +7,14 @@ exports_files([
     "jesture.ico",
     "settings.svg",
     "settings.png",
+    "show.svg",
+    "show.png",
+    "hide.svg",
+    "hide.png",
+    "add.svg",
+    "add.png",
+    "add_element.svg",
+    "add_element.png",
 ])
 
 qt_resource(
@@ -16,6 +24,14 @@ qt_resource(
         "jesture.ico": ":jesture.ico",
         "settings.svg": ":settings.svg",
         "settings.png": ":settings.png",
+        "show.svg": ":show.svg",
+        "show.png": ":show.png",
+        "hide.svg": ":hide.svg",
+        "hide.png": ":hide.png",
+        "add.svg": ":add.svg",
+        "add.png": ":add.png",
+        "add_element.svg": ":add_element.svg",
+        "add_element.png": ":add_element.png"
     },
     prefix = "/jesture/icons",
 )

@@ -1,6 +1,7 @@
 #include "jesture/components/sidebar.h"
 
 #include <QHBoxLayout>
+#include <iostream>
 
 namespace jesture {
 Sidebar::Sidebar(QWidget* parent) : QWidget(parent), expanded(false) {
@@ -25,13 +26,29 @@ void Sidebar::setExpanded(bool expanded) {
     this->expanded = expanded;
 }
 
-QObject* Sidebar::createItem(const QIcon& icon, QString name) {
+SidebarItem* Sidebar::create_item(const QIcon& icon, QString name) {
     auto item = new SidebarItem(icon, name);
     layout->addWidget(item);
+
+    if (items.size() == 0) {
+        item->setEnabled(false);
+    }
+
+    item->connect(item, &SidebarItem::clicked, this,
+                  &Sidebar::handle_radio_buttons);
 
     items.push_back(item);
 
     return item;
+}
+
+void Sidebar::handle_radio_buttons() {
+    for (auto item : this->items) {
+        item->setEnabled(true);
+    }
+
+    SidebarItem* item = qobject_cast<SidebarItem*>(sender());
+    item->setEnabled(false);
 }
 
 void Sidebar::enterEvent(QEnterEvent* event) {
@@ -65,5 +82,7 @@ void SidebarItem::leaveEvent(QEvent* event) {
     // TODO
     QPushButton::leaveEvent(event);
 }
+
+QString SidebarItem::get_name() { return QString(this->name); }
 
 }  // namespace jesture

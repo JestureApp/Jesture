@@ -119,5 +119,5 @@ void setupMainWindow(MainWindow *window, QApplication *app,
 
     window->resize(1280, 720);
 
-    window->setWindowIcon(resourceManager->applicationWindowIcon());
+    window->setWindowIcon(resourceManager->application_icon());
 }

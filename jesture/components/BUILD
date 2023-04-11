@@ -34,3 +34,39 @@ qt_cc_library(
         "@qt//:qt_widgets",
     ]
 )
+
+qt_cc_library(
+    name = "settings_view",
+    srcs = ["settings_view.cc"],
+    moc_hdrs = ["settings_view.h"],
+    deps = [
+        "@qt//:qt_widgets",
+    ]
+)
+
+qt_cc_library(
+    name = "gesture_list_view",
+    srcs = ["gesture_list_view.cc"],
+    moc_hdrs = ["gesture_list_view.h"],
+    deps = [
+        "@qt//:qt_widgets",
+    ]
+)
+
+qt_cc_library(
+    name = "recording_review",
+    srcs = ["recording_review.cc"],
+    moc_hdrs = ["recording_review.h"],
+    deps = [
+        "@qt//:qt_widgets"
+    ]
+)
+
+qt_cc_library(
+    name = "recording_view",
+    srcs = ["recording_view.cc"],
+    moc_hdrs = ["recording_view.h"],
+    deps = [
+        "@qt//:qt_widgets"
+    ]
+)

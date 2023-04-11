@@ -1,7 +1,9 @@
 #include "jesture/components/settings_view.h"
 
-#include <QWidget>
+#include <QLabel>
 
 namespace jesture {
-SettingsView::SettingsView(QWidget* parent = nullptr) : QWidget(parent) { auto }
+SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
+    auto title = new QLabel("Settings", this);
+}
 }  // namespace jesture

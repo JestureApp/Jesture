@@ -21,6 +21,10 @@ qt_cc_library(
     deps = [
         # "//icons",
         "//jesture/components:pipeline_view",
+        "//jesture/components:settings_view",
+        "//jesture/components:gesture_list_view",
+        "//jesture/components:recording_view",
+        "//jesture/components:recording_review",
         "//jesture/components:sidebar",
         "//jesture/jesturepipe:landmarks",
         "//jesture/managers:camera",

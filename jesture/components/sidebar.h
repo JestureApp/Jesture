@@ -13,6 +13,7 @@ class SidebarItem : public QPushButton {
     Q_OBJECT
    public:
     SidebarItem(const QIcon& icon, QString name, QWidget* parent = nullptr);
+    QString get_name();
 
    public slots:
     void setLabelVisible(bool visible);
@@ -30,12 +31,13 @@ class Sidebar : public QWidget {
    public:
     explicit Sidebar(QWidget* parent = nullptr);
 
-    QObject* createItem(const QIcon& icon, QString name);
+    SidebarItem* create_item(const QIcon& icon, QString name);
 
    public slots:
     void reveal();
     void hide();
     void setExpanded(bool expanded);
+    void handle_radio_buttons();
 
    protected:
     void enterEvent(QEnterEvent* event) override;
