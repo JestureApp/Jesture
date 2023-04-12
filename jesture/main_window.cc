@@ -2,7 +2,8 @@
 
 namespace jesture {
 
-MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
+MainWindow::MainWindow(Camera* camera, Resources* resources, Config* config,
+                       QWidget* parent)
     : QMainWindow(parent) {
     auto main = new QWidget(this);
 
@@ -41,10 +42,10 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     settings_view = new SettingsView(this);
     content_layout->addWidget(settings_view);
 
-    connect(settings_view, &SettingsView::camera_changed, this,
-            &MainWindow::camera_changed);
+    connect(settings_view, &SettingsView::camera_changed, config,
+            &Config::setCameraDevice);
 
-    gesture_list_view = new GestureListView(resources, this);
+    gesture_list_view = new GestureListView(resources, config, this);
     content_layout->addWidget(gesture_list_view);
 
     connect(gesture_list_view, &GestureListView::record_gesture, camera_tab,
@@ -65,6 +66,7 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
             &SidebarItem::released);
     connect(recording_review, &RecordingReview::save_gesture, this,
             &MainWindow::handle_save_gesture);
+    connect(this, &MainWindow::add_gesture, config, &Config::addGesture);
 
     setCentralWidget(main);
 }

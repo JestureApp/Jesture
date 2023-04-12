@@ -17,8 +17,12 @@ class GestureListItem : public QWidget {
     explicit GestureListItem(int id, Gesture gesture, Action* action,
                              QIcon cross_icon, QWidget* parent = nullptr);
 
+   signals:
+    void delete_gesture(int id);
+
    private slots:
     void disable_key_input(QAbstractButton* button);
+    void delete_this_item();
 
    private:
     int id;

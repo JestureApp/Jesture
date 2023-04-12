@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     setupConfig(config, &app);
     setupCamera(camera, config);
 
-    auto window = new MainWindow(camera, &resources);
+    auto window = new MainWindow(camera, &resources, config);
     setupMainWindow(window, &app, pipeline, &resources, config);
 
     window->show();
@@ -122,12 +122,6 @@ void setupMainWindow(MainWindow *window, QApplication *app,
                      &JesturePipeController::setRecording);
     QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
                      &MainWindow::get_recorded_gesture);
-
-    // Config connections
-    QObject::connect(window, &MainWindow::camera_changed, config,
-                     &Config::setCameraDevice);
-    QObject::connect(window, &MainWindow::add_gesture, config,
-                     &Config::addGesture);
 
     window->resize(1280, 720);
     window->setWindowIcon(resourceManager->application_icon());

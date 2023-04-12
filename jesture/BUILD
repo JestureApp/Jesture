@@ -31,6 +31,7 @@ qt_cc_library(
         "//jesture/managers:resources",
         "@qt//:qt_widgets",
         "@jesturepipe//jesturepipe/gesture",
+        "//jesture/managers:config"
     ],
 )
 

@@ -11,6 +11,7 @@
 #include "jesture/jesturepipe/gesture.h"
 #include "jesture/jesturepipe/landmarks.h"
 #include "jesture/managers/camera.h"
+#include "jesture/managers/config.h"
 #include "jesture/managers/resources.h"
 #include "jesturepipe/gesture/gesture.h"
 
@@ -20,14 +21,13 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
    public:
-    explicit MainWindow(Camera* camera, Resources* resources,
+    explicit MainWindow(Camera* camera, Resources* resources, Config* config,
                         QWidget* parent = nullptr);
 
    signals:
     void quit();
     void set_recording(bool on);
     void open_recorded_gesture(jesturepipe::Gesture gesture);
-    void camera_changed(const QCameraDevice& device);
     int add_gesture(Gesture gesture);
 
    public slots:

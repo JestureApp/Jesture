@@ -24,8 +24,11 @@ GestureListItem::GestureListItem(int id, Gesture gesture, Action* action,
     button_group->addButton(mouse_release_button);
     button_group->addButton(keyboard_action_button);
     keyboard_action_button->setChecked(true);
+
     connect(button_group, &QButtonGroup::buttonReleased, this,
             &GestureListItem::disable_key_input);
+    connect(delete_button, &QPushButton::released, this,
+            &GestureListItem::delete_this_item);
 
     layout->addWidget(label);
     layout->addWidget(mouse_grab_button);
@@ -42,4 +45,6 @@ void GestureListItem::disable_key_input(QAbstractButton* button) {
         keyboard_action_input->setEnabled(false);
     }
 }
+
+void GestureListItem::delete_this_item() { delete_gesture(id); }
 }  // namespace jesture

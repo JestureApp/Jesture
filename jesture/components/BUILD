@@ -55,7 +55,8 @@ qt_cc_library(
         "//jesture/jesturepipe:action",
         "@jesturepipe//jesturepipe/gesture",
         ":gesture_list_item",
-        "//jesture/managers:resources"
+        "//jesture/managers:resources",
+        "//jesture/managers:config"
     ]
 )
 
