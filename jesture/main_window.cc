@@ -24,9 +24,6 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     item = sidebar->create_item(resources->add_element_icon(), "Gesture List");
     connect(item, &SidebarItem::clicked, this,
             &MainWindow::show_gesture_list_view);
-    item = sidebar->create_item(resources->add_icon(), "Record Gesture");
-    connect(item, &SidebarItem::clicked, this,
-            &MainWindow::show_recording_view);
 
     auto content = new QWidget(main);
     main_layout->addWidget(content);
@@ -45,9 +42,6 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
 
     gesture_list_view = new GestureListView(this);
     content_layout->addWidget(gesture_list_view);
-
-    recording_view = new RecordingView(this);
-    content_layout->addWidget(recording_view);
 
     recording_review = new RecordingReview(this);
     content_layout->addWidget(recording_review);
@@ -69,10 +63,6 @@ void MainWindow::show_settings_view() {
 
 void MainWindow::show_gesture_list_view() {
     content_layout->setCurrentWidget(gesture_list_view);
-}
-
-void MainWindow::show_recording_view() {
-    content_layout->setCurrentWidget(recording_view);
 }
 
 void MainWindow::show_recording_review() {

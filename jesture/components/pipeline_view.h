@@ -38,6 +38,7 @@ class PipelineView : public QGraphicsView {
     LandmarksItem* second_hand_landmarks;
     QGraphicsVideoItem* camera_feed;
     QGraphicsScene* scene;
+    int recording_mode = 0;
 };
 
 }  // namespace jesture

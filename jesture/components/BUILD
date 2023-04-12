@@ -50,6 +50,10 @@ qt_cc_library(
     moc_hdrs = ["gesture_list_view.h"],
     deps = [
         "@qt//:qt_widgets",
+        "//jesture/jesturepipe:gesture",
+        "//jesture/jesturepipe:action",
+        "@jesturepipe//jesturepipe/gesture",
+        ":gesture_list_item"
     ]
 )
 
@@ -63,10 +67,12 @@ qt_cc_library(
 )
 
 qt_cc_library(
-    name = "recording_view",
-    srcs = ["recording_view.cc"],
-    moc_hdrs = ["recording_view.h"],
+    name = "gesture_list_item",
+    srcs = ["gesture_list_item.cc"],
+    moc_hdrs = ["gesture_list_item.h"],
     deps = [
-        "@qt//:qt_widgets"
+        "@qt//:qt_widgets",
+        "//jesture/jesturepipe:gesture",
+        "//jesture/jesturepipe:action"
     ]
 )

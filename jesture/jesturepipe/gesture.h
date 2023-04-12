@@ -1,8 +1,9 @@
 #ifndef JESTURE_JESTUREPIPE_GESTURE_H
 #define JESTURE_JESTUREPIPE_GESTURE_H
 
-#include "jesturepipe/gesture/gesture.h"
 #include <string>
+
+#include "jesturepipe/gesture/gesture.h"
 
 namespace jesture {
 class Gesture {

@@ -6,7 +6,6 @@
 #include "jesture/components/gesture_list_view.h"
 #include "jesture/components/pipeline_view.h"
 #include "jesture/components/recording_review.h"
-#include "jesture/components/recording_view.h"
 #include "jesture/components/settings_view.h"
 #include "jesture/components/sidebar.h"
 #include "jesture/jesturepipe/landmarks.h"
@@ -38,7 +37,6 @@ class MainWindow : public QMainWindow {
     PipelineView* pipeline_view;
     SettingsView* settings_view;
     GestureListView* gesture_list_view;
-    RecordingView* recording_view;
     RecordingReview* recording_review;
 };
 

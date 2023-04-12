@@ -1,7 +1,10 @@
 #include "jesture/components/pipeline_view.h"
 
 #include <QBrush>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QPen>
+#include <QPushButton>
 #include <QSizePolicy>
 
 namespace jesture {
@@ -57,6 +60,12 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
 
     // Ensure camera is running
     camera->start();
+
+    auto layout = new QHBoxLayout(this);
+    auto hint_text = new QLabel("Recording in 3...", this);
+    auto stop_recording_button = new QPushButton("Stop Recording", this);
+    layout->addWidget(hint_text);
+    layout->addWidget(stop_recording_button);
 }
 
 QSize PipelineView::sizeHint() const { return sceneRect().size().toSize(); }
