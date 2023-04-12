@@ -49,6 +49,10 @@ JesturePipeController::JesturePipeController(
         "Gesture Recognition Callback",
         pipeline.OnGestureRecognition(std::bind(
             &JesturePipeController::onGestureRecognized, this, _1, _2)));
+
+    check_status("Gesture Recorded Callback",
+                 pipeline.OnRecordedGesture(std::bind(
+                     &JesturePipeController::onGestureRecorded, this, _1, _2)));
 }
 
 JesturePipeController::~JesturePipeController() { stop(); }
