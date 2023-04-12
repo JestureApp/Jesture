@@ -3,14 +3,17 @@
 
 #include <QWidget>
 
+#include "jesture/managers/resources.h"
+
 namespace jesture {
 
 class GestureListView : public QWidget {
     Q_OBJECT
    public:
-    explicit GestureListView(QWidget* parent = nullptr);
+    explicit GestureListView(Resources* resources, QWidget* parent = nullptr);
 
-   private:
+   signals:
+    void add_gesture();
 };
 
 }  // namespace jesture

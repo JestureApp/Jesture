@@ -2,9 +2,7 @@
 
 #include <QBrush>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QPen>
-#include <QPushButton>
 #include <QSizePolicy>
 
 namespace jesture {
@@ -61,10 +59,19 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     // Ensure camera is running
     camera->start();
 
+    // Recording overlay elements
     auto layout = new QHBoxLayout(this);
-    auto hint_text = new QLabel("Recording in 3...", this);
-    auto stop_recording_button = new QPushButton("Stop Recording", this);
-    layout->addWidget(hint_text);
+    hint = new QLabel("Recording in 3...", this);
+    stop_recording_button = new QPushButton("Stop Recording", this);
+
+    hint->setWordWrap(true);
+
+    connect(stop_recording_button, &QPushButton::released, this,
+            &PipelineView::hide_recording);
+
+    hide_recording();
+
+    layout->addWidget(hint);
     layout->addWidget(stop_recording_button);
 }
 
@@ -107,6 +114,35 @@ void PipelineView::resizeEvent(QResizeEvent* event) {
     fitInView(scene->sceneRect(), Qt::KeepAspectRatioByExpanding);
 
     QGraphicsView::resizeEvent(event);
+}
+
+void PipelineView::countdown_recording() {
+    if (seconds_to_recording == 0) {
+        recording_countdown_finished();
+        hint->setText(
+            "Recording! Keep your hands clearly visible, and move in one "
+            "smooth, straight motion!");
+    } else if (seconds_to_recording > 0) {
+        std::string text = std::string("Recording in ") +
+                           std::to_string(seconds_to_recording) +
+                           std::string("...");
+        hint->setText(text.c_str());
+        seconds_to_recording--;
+        QTimer::singleShot(1000, this, &PipelineView::countdown_recording);
+    }
+}
+
+void PipelineView::show_recording() {
+    hint->show();
+    stop_recording_button->show();
+    seconds_to_recording = 3;
+    countdown_recording();
+}
+
+void PipelineView::hide_recording() {
+    hint->hide();
+    stop_recording_button->hide();
+    seconds_to_recording = -1;
 }
 
 }  // namespace jesture

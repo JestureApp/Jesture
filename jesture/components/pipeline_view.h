@@ -6,7 +6,9 @@
 #include <QGraphicsScene>
 #include <QGraphicsVideoItem>
 #include <QGraphicsView>
+#include <QLabel>
 #include <QPen>
+#include <QPushButton>
 #include <QWidget>
 
 #include "jesture/components/landmarks_item.h"
@@ -22,8 +24,13 @@ class PipelineView : public QGraphicsView {
 
     QSize sizeHint() const override;
 
+   signals:
+    void recording_countdown_finished();
+
    public slots:
     void drawLandmarks(std::vector<Landmarks> landmarks);
+    void show_recording();
+    void hide_recording();
 
    protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -31,6 +38,7 @@ class PipelineView : public QGraphicsView {
    private slots:
     void updateSizes(const QSizeF& video_size);
     void updateReflection();
+    void countdown_recording();
 
    private:
     Camera* camera;
@@ -38,7 +46,9 @@ class PipelineView : public QGraphicsView {
     LandmarksItem* second_hand_landmarks;
     QGraphicsVideoItem* camera_feed;
     QGraphicsScene* scene;
-    int recording_mode = 0;
+    int seconds_to_recording;
+    QLabel* hint;
+    QPushButton* stop_recording_button;
 };
 
 }  // namespace jesture

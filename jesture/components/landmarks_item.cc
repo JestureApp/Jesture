@@ -11,8 +11,8 @@ LandmarksItem::LandmarksItem(QGraphicsItem *parent)
     valid_timer = new QTimer(this);
     valid_timer->setSingleShot(true);
 
-    QObject::connect(valid_timer, &QTimer::timeout, this,
-                     [this]() { this->setVisible(false); });
+    connect(valid_timer, &QTimer::timeout, this,
+            [this]() { this->setVisible(false); });
 }
 
 void LandmarksItem::setSize(const QSizeF &size) { this->size = size; }

@@ -46,6 +46,10 @@ QIcon Resources::show_icon() const { return get_icon_format_agnostic("show"); }
 
 QIcon Resources::hide_icon() const { return get_icon_format_agnostic("hide"); }
 
+QIcon Resources::cross_icon() const {
+    return get_icon_format_agnostic("cross");
+}
+
 fs::path Resources::handLandmarkFullPath() const {
     return hand_landmark_full_path;
 }

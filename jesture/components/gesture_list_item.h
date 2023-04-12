@@ -1,6 +1,7 @@
 #ifndef JESTURE_COMPONENTS_GESTURE_LIST_ITEM_H
 #define JESTURE_COMPONENTS_GESTURE_LIST_ITEM_H
 
+#include <QIcon>
 #include <QKeySequenceEdit>
 #include <QRadioButton>
 #include <QWidget>
@@ -13,7 +14,7 @@ namespace jesture {
 class GestureListItem : public QWidget {
     Q_OBJECT
    public:
-    explicit GestureListItem(Gesture* gesture, Action* action,
+    explicit GestureListItem(Gesture* gesture, Action* action, QIcon cross_icon,
                              QWidget* parent = nullptr);
 
    private slots:

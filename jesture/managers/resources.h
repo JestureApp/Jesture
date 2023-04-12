@@ -17,6 +17,7 @@ class Resources {
     QIcon add_icon() const;
     QIcon show_icon() const;
     QIcon hide_icon() const;
+    QIcon cross_icon() const;
 
     fs::path handLandmarkFullPath() const;
     fs::path handLandmarkLitePath() const;

@@ -34,8 +34,7 @@ SidebarItem* Sidebar::create_item(const QIcon& icon, QString name) {
         item->setEnabled(false);
     }
 
-    item->connect(item, &SidebarItem::clicked, this,
-                  &Sidebar::handle_radio_buttons);
+    connect(item, &SidebarItem::released, this, &Sidebar::handle_radio_buttons);
 
     items.push_back(item);
 

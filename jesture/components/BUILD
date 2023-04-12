@@ -53,7 +53,8 @@ qt_cc_library(
         "//jesture/jesturepipe:gesture",
         "//jesture/jesturepipe:action",
         "@jesturepipe//jesturepipe/gesture",
-        ":gesture_list_item"
+        ":gesture_list_item",
+        "//jesture/managers:resources"
     ]
 )
 

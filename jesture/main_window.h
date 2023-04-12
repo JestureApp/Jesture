@@ -23,6 +23,8 @@ class MainWindow : public QMainWindow {
 
    signals:
     void quit();
+    void start_recording();
+    // void get_recorded_gesture(Gesture* gesture);
 
    public slots:
     void drawLandmarks(std::vector<Landmarks>);

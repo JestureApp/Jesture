@@ -16,13 +16,18 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     auto sidebar = new Sidebar(this);
     main_layout->addWidget(sidebar);
 
-    SidebarItem* item;
-    item = sidebar->create_item(resources->show_icon(), "Camera View");
-    connect(item, &SidebarItem::clicked, this, &MainWindow::show_pipeline_view);
-    item = sidebar->create_item(resources->settings_icon(), "Settings");
-    connect(item, &SidebarItem::clicked, this, &MainWindow::show_settings_view);
-    item = sidebar->create_item(resources->add_element_icon(), "Gesture List");
-    connect(item, &SidebarItem::clicked, this,
+    auto camera_tab =
+        sidebar->create_item(resources->show_icon(), "Camera View");
+    auto settings_tab =
+        sidebar->create_item(resources->settings_icon(), "Settings");
+    auto gesture_tab =
+        sidebar->create_item(resources->add_element_icon(), "Gesture List");
+
+    connect(camera_tab, &SidebarItem::released, this,
+            &MainWindow::show_pipeline_view);
+    connect(settings_tab, &SidebarItem::released, this,
+            &MainWindow::show_settings_view);
+    connect(gesture_tab, &SidebarItem::released, this,
             &MainWindow::show_gesture_list_view);
 
     auto content = new QWidget(main);
@@ -40,8 +45,13 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     settings_view = new SettingsView(this);
     content_layout->addWidget(settings_view);
 
-    gesture_list_view = new GestureListView(this);
+    gesture_list_view = new GestureListView(resources, this);
     content_layout->addWidget(gesture_list_view);
+
+    connect(gesture_list_view, &GestureListView::add_gesture, camera_tab,
+            &SidebarItem::released);
+    connect(gesture_list_view, &GestureListView::add_gesture, pipeline_view,
+            &PipelineView::show_recording);
 
     recording_review = new RecordingReview(this);
     content_layout->addWidget(recording_review);

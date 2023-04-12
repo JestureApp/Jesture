@@ -11,7 +11,8 @@
 #include "jesturepipe/gesture/gesture.h"
 
 namespace jesture {
-GestureListView::GestureListView(QWidget* parent) : QWidget(parent) {
+GestureListView::GestureListView(Resources* resources, QWidget* parent)
+    : QWidget(parent) {
     auto layout = new QVBoxLayout(this);
 
     auto title = new QLabel("Gesture List", this);
@@ -22,11 +23,15 @@ GestureListView::GestureListView(QWidget* parent) : QWidget(parent) {
     auto next_gesture = new Gesture("Next", jesturepipe::Gesture::Next());
     auto prev_gesture = new Gesture("Prev", jesturepipe::Gesture::Prev());
 
-    auto stop_item = new GestureListItem(stop_gesture, NULL, this);
-    auto pause_item = new GestureListItem(pause_gesture, NULL, this);
-    auto next_item = new GestureListItem(next_gesture, NULL, this);
-    auto prev_item = new GestureListItem(prev_gesture, NULL, this);
+    auto cross_icon = resources->cross_icon();
+    auto stop_item = new GestureListItem(stop_gesture, NULL, cross_icon, this);
+    auto pause_item =
+        new GestureListItem(pause_gesture, NULL, cross_icon, this);
+    auto next_item = new GestureListItem(next_gesture, NULL, cross_icon, this);
+    auto prev_item = new GestureListItem(prev_gesture, NULL, cross_icon, this);
     auto add_gesture_button = new QPushButton("Record A New Gesture", this);
+    connect(add_gesture_button, &QPushButton::released, this,
+            &GestureListView::add_gesture);
 
     layout->addWidget(stop_item);
     layout->addWidget(pause_item);

@@ -15,6 +15,8 @@ exports_files([
     "add.png",
     "add_element.svg",
     "add_element.png",
+    "cross.svg",
+    "cross.png"
 ])
 
 qt_resource(
@@ -31,7 +33,9 @@ qt_resource(
         "add.svg": ":add.svg",
         "add.png": ":add.png",
         "add_element.svg": ":add_element.svg",
-        "add_element.png": ":add_element.png"
+        "add_element.png": ":add_element.png",
+        "cross.svg": ":cross.svg",
+        "cross.png": ":cross.png"
     },
     prefix = "/jesture/icons",
 )
