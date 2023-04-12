@@ -42,6 +42,7 @@ qt_cc_library(
     deps = [
         "@qt//:qt_widgets",
         "@qt//:qt_multimedia",
+        "//jesture/managers:config"
     ]
 )
 

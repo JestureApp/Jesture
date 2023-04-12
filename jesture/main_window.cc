@@ -39,11 +39,8 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, Config* config,
     pipeline_view->setContentsMargins(0, 0, 0, 0);
     content_layout->addWidget(pipeline_view);
 
-    settings_view = new SettingsView(this);
+    settings_view = new SettingsView(config, this);
     content_layout->addWidget(settings_view);
-
-    connect(settings_view, &SettingsView::camera_changed, config,
-            &Config::setCameraDevice);
 
     gesture_list_view = new GestureListView(resources, config, this);
     content_layout->addWidget(gesture_list_view);

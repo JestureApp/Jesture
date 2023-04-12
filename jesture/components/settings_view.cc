@@ -9,7 +9,7 @@
 #include <QString>
 
 namespace jesture {
-SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
+SettingsView::SettingsView(Config* config, QWidget* parent) : QWidget(parent) {
     auto parent_layout = new QVBoxLayout(this);
     auto layout = new QGridLayout(this);
     parent_layout->addLayout(layout);
@@ -20,17 +20,24 @@ SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
     layout->addWidget(title, 0, 0, 1, 2);
 
     auto accuracy_label = new QLabel("Gesture Recognition Accuracy", this);
-    auto accuracy_slider = new QSlider(Qt::Horizontal, this);
+    auto accuracy_combo = new QComboBox(this);
     auto accuracy_explanation = new QLabel(
-        "Higher values mean better gesture recognition at a lower performance, "
-        "and the opposite is true for lower values.",
+        "Setting accuracy to diminished may improve performance on lower-end "
+        "hardware.",
         this);
 
     accuracy_label->setWordWrap(true);
+    accuracy_combo->addItem("Full");
+    accuracy_combo->addItem("Diminished");
     accuracy_explanation->setWordWrap(true);
 
+    connect(accuracy_combo, &QComboBox::currentIndexChanged, this,
+            &SettingsView::combo_index_to_accuracy);
+    connect(this, &SettingsView::accuracy_changed, config,
+            &Config::setPipelineSettings);
+
     layout->addWidget(accuracy_label, 1, 0);
-    layout->addWidget(accuracy_slider, 1, 1);
+    layout->addWidget(accuracy_combo, 1, 1);
     layout->addWidget(accuracy_explanation, 2, 0, 1, 2);
 
     auto camera_label = new QLabel("Camera", this);
@@ -43,11 +50,11 @@ SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
     camera_combo->addItems(camera_descriptions);
     camera_combo->setCurrentText(
         QMediaDevices::defaultVideoInput().description());
-    connect(camera_combo, &QComboBox::currentIndexChanged, this, [this](int i) {
-        auto devices = QMediaDevices::videoInputs();
 
-        emit camera_changed(devices[i]);
-    });
+    connect(camera_combo, &QComboBox::currentIndexChanged, this,
+            &SettingsView::combo_index_to_camera_device);
+    connect(this, &SettingsView::camera_changed, config,
+            &Config::cameraDeviceChanged);
 
     layout->addWidget(camera_label, 3, 0);
     layout->addWidget(camera_combo, 3, 1);
@@ -66,5 +73,14 @@ SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
     layout->addWidget(camera_zoom_label, 4, 0);
     layout->addWidget(camera_zoom_slider, 4, 1);
     layout->addWidget(camera_zoom_explanation, 5, 0, 1, 2);
+}
+
+void SettingsView::combo_index_to_camera_device(int index) {
+    auto devices = QMediaDevices::videoInputs();
+    camera_changed(devices[index]);
+}
+
+void SettingsView::combo_index_to_accuracy(int index) {
+    accuracy_changed(index == 0);
 }
 }  // namespace jesture
