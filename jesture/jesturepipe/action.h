@@ -2,19 +2,26 @@
 #define JESTURE_JESTUREPIPE_ACTION_H
 
 #include <QKeySequence>
-#include <list>
 
 #include "jesturepipe/actions/action.h"
 
 namespace jesture {
+
+actions::action::KeySequence keySequenceFromQt(QKeySequence keys);
 
 typedef struct Action {
     jesturepipe::Action pipeline_action;
     QKeySequence sequence;
 } Action;
 
+Action Keystroke(const QKeySequence &keys);
+
+Action KeysPress(const QKeySequence &keys);
+
+Action KeysRelease(const QKeySequence &keys);
+
 typedef struct ActionsList {
-    std::list<Action> action_list;
+    std::vector<Action> action_list;
     jesturepipe::CursorControl cursor_control;
 } ActionsList;
 

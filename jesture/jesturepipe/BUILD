@@ -40,10 +40,13 @@ cc_library(
     ],
 )
 
-cc_library(
+qt_cc_library(
     name = "action",
+    srcs = ["action.cc"],
     hdrs = ["action.h"],
     deps = [
+        "@com_google_absl//absl/status:statusor",
         "@jesturepipe//jesturepipe/actions:action",
+        "@qt//:qt_gui",
     ],
 )

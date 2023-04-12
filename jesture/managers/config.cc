@@ -225,8 +225,6 @@ void Config::setToDefaultSettings() {
 void Config::setToDefaultGestures() {
     clearGestures();
 
-    int stop = addGesture(Gesture("Stop", jesturepipe::Gesture::Stop()));
-
     int next = addGesture(Gesture("Next", jesturepipe::Gesture::Next()));
 
     int prev = addGesture(Gesture("Prev", jesturepipe::Gesture::Prev()));
@@ -236,6 +234,12 @@ void Config::setToDefaultGestures() {
 
     int slide_right =
         addGesture(Gesture("Slide Right", jesturepipe::Gesture::SlideRight()));
+
+    setAction(slide_left,
+              ActionsList{.action_list = {Keystroke(Qt::Key_PageUp)}});
+
+    setAction(slide_right,
+              ActionsList{.action_list = {Keystroke(Qt::Key_PageDown)}});
 }
 
 }  // namespace jesture

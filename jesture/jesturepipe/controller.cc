@@ -103,7 +103,16 @@ void JesturePipeController::clearGestures() {
 }
 
 void JesturePipeController::setAction(int gesture_id, ActionsList actions) {
-    pipeline.SetAction(gesture_id, actions.action_list.front().pipeline_action);
+    std::vector<jesturepipe::Action> pipeline_actions;
+
+    for (auto action : actions.action_list) {
+        pipeline_actions.push_back(action.pipeline_action);
+    }
+
+    jesturepipe::ActionList pipeline_action_list{
+        .actions = pipeline_actions, .cursor_control = actions.cursor_control};
+
+    pipeline.SetAction(gesture_id, pipeline_action_list);
 
     LOG(INFO) << "Added action with id " << gesture_id;
 }
