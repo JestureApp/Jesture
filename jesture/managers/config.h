@@ -14,10 +14,8 @@ class Config : public QObject {
     Q_OBJECT
 
    public:
-    explicit Config(QObject *parent = nullptr);
-
+    explicit Config(QObject* parent = nullptr);
     QCameraDevice cameraDevice() const;
-    void setCameraDevice(QCameraDevice camera_device);
 
    public slots:
     int addGesture(Gesture gesture);
@@ -32,6 +30,9 @@ class Config : public QObject {
 
     void setToDefaultSettings();
     void setToDefaultGestures();
+
+    void set_camera_from_description(const QString& camera_description);
+    void setCameraDevice(QCameraDevice camera_device);
 
    signals:
     void cameraDeviceChanged(QCameraDevice camera_device);

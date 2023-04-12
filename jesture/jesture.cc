@@ -23,7 +23,7 @@ void setupCamera(Camera *camera, Config *config);
 void setupPipeline(JesturePipeController *pipeline, Config *config);
 void setupMainWindow(MainWindow *window, QApplication *app,
                      JesturePipeController *pipeline,
-                     Resources *resourceManager);
+                     Resources *resourceManager, Config *config);
 
 void defaultFlagValues() {
     FLAGS_silent = false;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     setupCamera(camera, config);
 
     auto window = new MainWindow(camera, &resources);
-    setupMainWindow(window, &app, pipeline, &resources);
+    setupMainWindow(window, &app, pipeline, &resources, config);
 
     window->show();
 
@@ -108,7 +108,7 @@ void setupPipeline(JesturePipeController *pipeline, Config *config) {
 
 void setupMainWindow(MainWindow *window, QApplication *app,
                      JesturePipeController *pipeline,
-                     Resources *resourceManager) {
+                     Resources *resourceManager, Config *config) {
     QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
 
     QObject::connect(
@@ -120,6 +120,8 @@ void setupMainWindow(MainWindow *window, QApplication *app,
                      &JesturePipeController::setRecording);
     QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
                      &MainWindow::get_recorded_gesture);
+    QObject::connect(window, &MainWindow::camera_changed, config,
+                     &Config::set_camera_from_description);
 
     window->resize(1280, 720);
 

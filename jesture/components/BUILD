@@ -41,6 +41,7 @@ qt_cc_library(
     moc_hdrs = ["settings_view.h"],
     deps = [
         "@qt//:qt_widgets",
+        "@qt//:qt_multimedia",
     ]
 )
 

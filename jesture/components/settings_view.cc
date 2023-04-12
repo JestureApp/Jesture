@@ -3,7 +3,10 @@
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
+#include <QList>
+#include <QMediaDevices>
 #include <QSlider>
+#include <QString>
 
 namespace jesture {
 SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
@@ -32,6 +35,16 @@ SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
 
     auto camera_label = new QLabel("Camera", this);
     auto camera_combo = new QComboBox(this);
+
+    QList<QString> camera_descriptions;
+    for (const auto& camera : QMediaDevices::videoInputs()) {
+        camera_descriptions.append(camera.description());
+    }
+    camera_combo->addItems(camera_descriptions);
+    camera_combo->setCurrentText(
+        QMediaDevices::defaultVideoInput().description());
+    connect(camera_combo, &QComboBox::currentTextChanged, this,
+            &SettingsView::camera_changed);
 
     layout->addWidget(camera_label, 3, 0);
     layout->addWidget(camera_combo, 3, 1);

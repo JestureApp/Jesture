@@ -1,5 +1,7 @@
 #include "jesture/main_window.h"
 
+#include <iostream>
+
 namespace jesture {
 
 MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
@@ -40,6 +42,9 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
 
     settings_view = new SettingsView(this);
     content_layout->addWidget(settings_view);
+
+    connect(settings_view, &SettingsView::camera_changed, this,
+            &MainWindow::camera_changed);
 
     gesture_list_view = new GestureListView(resources, this);
     content_layout->addWidget(gesture_list_view);
@@ -85,6 +90,7 @@ void MainWindow::handle_recording_update(bool on) {
 
 void MainWindow::get_recorded_gesture(jesturepipe::Gesture gesture,
                                       unsigned long timestamp) {
+    std::cout << "Recording finished!" << std::endl;
     content_layout->setCurrentWidget(recording_review);
     gesture_tab->setEnabled(true);
     open_recorded_gesture(gesture);

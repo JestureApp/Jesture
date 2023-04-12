@@ -1,6 +1,7 @@
 #ifndef JESTURE_COMPONENTS_SETTINGS_VIEW_H
 #define JESTURE_COMPONENTS_SETTINGS_VIEW_H
 
+#include <QCameraDevice>
 #include <QWidget>
 
 namespace jesture {
@@ -10,7 +11,8 @@ class SettingsView : public QWidget {
    public:
     explicit SettingsView(QWidget* parent = nullptr);
 
-   private:
+   signals:
+    void camera_changed(const QString& camera_description);
 };
 
 }  // namespace jesture
