@@ -69,10 +69,7 @@ void printResources() {
     }
 }
 
-void setupApp(QApplication *app) {
-    app->setApplicationName("Jesture");
-    app->setOrganizationName("Jesture");
-}
+void setupApp(QApplication *app) { app->setApplicationName("Jesture"); }
 
 void setupConfig(Config *config, QApplication *app) {
     config->init(FLAGS_config);
