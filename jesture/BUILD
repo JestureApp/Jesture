@@ -29,6 +29,7 @@ qt_cc_library(
         "//jesture/managers:camera",
         "//jesture/managers:resources",
         "@qt//:qt_widgets",
+        "@jesturepipe//jesturepipe/gesture",
     ],
 )
 

@@ -118,7 +118,7 @@ void PipelineView::resizeEvent(QResizeEvent* event) {
 
 void PipelineView::countdown_recording() {
     if (seconds_to_recording == 0) {
-        recording_countdown_finished();
+        set_recording(true);
         hint->setText(
             "Recording! Keep your hands clearly visible, and move in one "
             "smooth, straight motion!");
@@ -143,6 +143,7 @@ void PipelineView::hide_recording() {
     hint->hide();
     stop_recording_button->hide();
     seconds_to_recording = -1;
+    set_recording(false);
 }
 
 }  // namespace jesture

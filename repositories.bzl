@@ -36,18 +36,18 @@ def jesture_repositories():
         commit = "81a1fc11b6ac9e7bfa039e05499739b58164f9c1",
     )
 
-    # maybe(
-    #     git_repository,
-    #     name = "jesturepipe",
-    #     remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-    #     commit = "ff8c18bd14d63c21d7cc3654ffbc6415c73a4c5b",
-    # )
-
     maybe(
-        native.local_repository,
+        git_repository,
         name = "jesturepipe",
-        path = "../JesturePipe",
+        remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
+        commit = "ff8c18bd14d63c21d7cc3654ffbc6415c73a4c5b",
     )
+
+    #maybe(
+    #    native.local_repository,
+    #    name = "jesturepipe",
+    #    path = "../JesturePipe",
+    #)
 
     http_archive(
         name = "com_github_gflags_gflags",

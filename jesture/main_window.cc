@@ -1,7 +1,5 @@
 #include "jesture/main_window.h"
 
-#include "jesture/components/sidebar.h"
-
 namespace jesture {
 
 MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
@@ -16,11 +14,9 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     auto sidebar = new Sidebar(this);
     main_layout->addWidget(sidebar);
 
-    auto camera_tab =
-        sidebar->create_item(resources->show_icon(), "Camera View");
-    auto settings_tab =
-        sidebar->create_item(resources->settings_icon(), "Settings");
-    auto gesture_tab =
+    camera_tab = sidebar->create_item(resources->show_icon(), "Camera View");
+    settings_tab = sidebar->create_item(resources->settings_icon(), "Settings");
+    gesture_tab =
         sidebar->create_item(resources->add_element_icon(), "Gesture List");
 
     connect(camera_tab, &SidebarItem::released, this,
@@ -52,9 +48,14 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
             &SidebarItem::released);
     connect(gesture_list_view, &GestureListView::add_gesture, pipeline_view,
             &PipelineView::show_recording);
+    connect(pipeline_view, &PipelineView::set_recording, this,
+            &MainWindow::handle_recording_update);
 
     recording_review = new RecordingReview(this);
     content_layout->addWidget(recording_review);
+
+    connect(this, &MainWindow::open_recorded_gesture, recording_review,
+            &RecordingReview::set_gesture);
 
     setCentralWidget(main);
 }
@@ -75,10 +76,18 @@ void MainWindow::show_gesture_list_view() {
     content_layout->setCurrentWidget(gesture_list_view);
 }
 
-void MainWindow::show_recording_view() { return; }
+void MainWindow::handle_recording_update(bool on) {
+    if (!on) {
+        gesture_tab->released();
+    }
+    set_recording(on);
+}
 
-void MainWindow::show_recording_review() {
+void MainWindow::get_recorded_gesture(jesturepipe::Gesture gesture,
+                                      unsigned long timestamp) {
     content_layout->setCurrentWidget(recording_review);
+    gesture_tab->setEnabled(true);
+    open_recorded_gesture(gesture);
 }
 
 }  // namespace jesture

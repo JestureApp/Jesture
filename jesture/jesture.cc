@@ -116,6 +116,10 @@ void setupMainWindow(MainWindow *window, QApplication *app,
         [window](std::vector<Landmarks> landmarks, unsigned long timestamp) {
             window->drawLandmarks(landmarks);
         });
+    QObject::connect(window, &MainWindow::set_recording, pipeline,
+                     &JesturePipeController::setRecording);
+    QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
+                     &MainWindow::get_recorded_gesture);
 
     window->resize(1280, 720);
 

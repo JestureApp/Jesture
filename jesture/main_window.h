@@ -11,6 +11,7 @@
 #include "jesture/jesturepipe/landmarks.h"
 #include "jesture/managers/camera.h"
 #include "jesture/managers/resources.h"
+#include "jesturepipe/gesture/gesture.h"
 
 namespace jesture {
 
@@ -23,16 +24,19 @@ class MainWindow : public QMainWindow {
 
    signals:
     void quit();
-    void start_recording();
-    // void get_recorded_gesture(Gesture* gesture);
+    void set_recording(bool on);
+    void open_recorded_gesture(jesturepipe::Gesture gesture);
 
    public slots:
     void drawLandmarks(std::vector<Landmarks>);
     void show_pipeline_view();
     void show_settings_view();
     void show_gesture_list_view();
-    void show_recording_view();
-    void show_recording_review();
+    void get_recorded_gesture(jesturepipe::Gesture gesture,
+                              unsigned long timestamp);
+
+   private slots:
+    void handle_recording_update(bool on);
 
    private:
     QStackedLayout* content_layout;
@@ -40,6 +44,9 @@ class MainWindow : public QMainWindow {
     SettingsView* settings_view;
     GestureListView* gesture_list_view;
     RecordingReview* recording_review;
+    SidebarItem* camera_tab;
+    SidebarItem* settings_tab;
+    SidebarItem* gesture_tab;
 };
 
 }  // namespace jesture

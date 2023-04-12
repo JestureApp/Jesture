@@ -25,7 +25,7 @@ class PipelineView : public QGraphicsView {
     QSize sizeHint() const override;
 
    signals:
-    void recording_countdown_finished();
+    void set_recording(bool on);
 
    public slots:
     void drawLandmarks(std::vector<Landmarks> landmarks);
