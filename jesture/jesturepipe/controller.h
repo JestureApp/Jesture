@@ -35,6 +35,7 @@ class JesturePipeController : public QObject {
     void gestureRecorded(jesturepipe::Gesture gesture, unsigned long timestamp);
 
    public slots:
+    void restart(bool use_full);
     void start(bool use_full);
     void stop();
 

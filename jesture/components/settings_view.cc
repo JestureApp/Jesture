@@ -43,8 +43,11 @@ SettingsView::SettingsView(QWidget* parent) : QWidget(parent) {
     camera_combo->addItems(camera_descriptions);
     camera_combo->setCurrentText(
         QMediaDevices::defaultVideoInput().description());
-    connect(camera_combo, &QComboBox::currentTextChanged, this,
-            &SettingsView::camera_changed);
+    connect(camera_combo, &QComboBox::currentIndexChanged, this, [this](int i) {
+        auto devices = QMediaDevices::videoInputs();
+
+        emit camera_changed(devices[i]);
+    });
 
     layout->addWidget(camera_label, 3, 0);
     layout->addWidget(camera_combo, 3, 1);

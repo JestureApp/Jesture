@@ -26,7 +26,7 @@ class MainWindow : public QMainWindow {
     void quit();
     void set_recording(bool on);
     void open_recorded_gesture(jesturepipe::Gesture gesture);
-    void camera_changed(const QString& camera_description);
+    void camera_changed(const QCameraDevice& device);
 
    public slots:
     void drawLandmarks(std::vector<Landmarks>);

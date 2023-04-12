@@ -104,6 +104,9 @@ void setupPipeline(JesturePipeController *pipeline, Config *config) {
 
     QObject::connect(config, &Config::actionRemoved, pipeline,
                      &JesturePipeController::removeAction);
+
+    QObject::connect(config, &Config::pipelineSettingsChanged, pipeline,
+                     &JesturePipeController::restart);
 }
 
 void setupMainWindow(MainWindow *window, QApplication *app,
@@ -121,7 +124,7 @@ void setupMainWindow(MainWindow *window, QApplication *app,
     QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
                      &MainWindow::get_recorded_gesture);
     QObject::connect(window, &MainWindow::camera_changed, config,
-                     &Config::set_camera_from_description);
+                     &Config::setCameraDevice);
 
     window->resize(1280, 720);
 

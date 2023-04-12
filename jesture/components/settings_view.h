@@ -12,7 +12,7 @@ class SettingsView : public QWidget {
     explicit SettingsView(QWidget* parent = nullptr);
 
    signals:
-    void camera_changed(const QString& camera_description);
+    void camera_changed(const QCameraDevice& device);
 };
 
 }  // namespace jesture

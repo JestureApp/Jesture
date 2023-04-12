@@ -63,6 +63,11 @@ bool JesturePipeController::isRecording() const {
     return pipeline.IsRecording();
 }
 
+void JesturePipeController::restart(bool use_full) {
+    stop();
+    start(use_full);
+}
+
 void JesturePipeController::start(bool use_full) {
     LOG(INFO) << "Starting pipeline";
     check_status("Pipeline start", pipeline.Start(use_full));

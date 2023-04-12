@@ -9,15 +9,6 @@ Config::Config(QObject* parent)
 
 QCameraDevice Config::cameraDevice() const { return camera_device; }
 
-void Config::set_camera_from_description(const QString& camera_description) {
-    for (const auto& camera : QMediaDevices::videoInputs()) {
-        if (camera.description() == camera_description) {
-            setCameraDevice(camera);
-            return;
-        }
-    }
-}
-
 void Config::setCameraDevice(QCameraDevice camera_device) {
     this->camera_device = camera_device;
 
