@@ -4,7 +4,8 @@
 
 namespace jesture {
 
-Config::Config(QObject* parent) : QObject(parent), next_gesture_id(0) {}
+Config::Config(QObject* parent)
+    : QObject(parent), next_gesture_id(0), use_full(false) {}
 
 QCameraDevice Config::cameraDevice() const { return camera_device; }
 
@@ -58,6 +59,12 @@ void Config::removeAction(int gesture_id) {
     emit actionRemoved(gesture_id);
 }
 
+void Config::setPipelineSettings(bool use_full) {
+    this->use_full = use_full;
+
+    emit pipelineSettingsChanged(use_full);
+}
+
 void Config::init(bool from_file) {
     if (!from_file) {
         setToDefaultSettings();
@@ -74,7 +81,9 @@ void Config::save() const {
 }
 
 void Config::setToDefaultSettings() {
-    camera_device = QMediaDevices::defaultVideoInput();
+    setCameraDevice(QMediaDevices::defaultVideoInput());
+
+    setPipelineSettings(false);
 }
 
 void Config::setToDefaultGestures() {

@@ -18,12 +18,16 @@ class Config : public QObject {
     QCameraDevice cameraDevice() const;
 
    public slots:
+    void setCameraDevice(QCameraDevice camera_device);
+
     int addGesture(Gesture gesture);
     void removeGesture(int gesture_id);
     void clearGestures();
 
     void setAction(int gesture_id, Action action);
     void removeAction(int gesture_id);
+
+    void setPipelineSettings(bool use_full);
 
     void init(bool from_file);
     void save() const;
@@ -44,8 +48,12 @@ class Config : public QObject {
     void actionChanged(int gesture_id, Action action);
     void actionRemoved(int gesture_id);
 
+    void pipelineSettingsChanged(bool use_full);
+
    private:
     int next_gesture_id;
+
+    bool use_full;
 
     QCameraDevice camera_device;
     std::map<int, Gesture> gestures;
