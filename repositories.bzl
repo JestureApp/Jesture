@@ -46,7 +46,7 @@ def jesture_repositories():
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "9887f4fe1933eb7a648981ac7922c74f0be4bf01",
+        commit = "31c6e9c942e421d73f5451da17f31bde75980504",
     )
 
     # maybe(

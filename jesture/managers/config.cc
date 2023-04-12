@@ -328,21 +328,35 @@ void Config::setToDefaultSettings() {
 void Config::setToDefaultGestures() {
     clearGestures();
 
-    int next = addGesture(Gesture("Next", jesturepipe::Gesture::Next()));
-
-    int prev = addGesture(Gesture("Prev", jesturepipe::Gesture::Prev()));
-
+    addGesture(Gesture("Pause", jesturepipe::Gesture::Pause()));
     int slide_left =
-        addGesture(Gesture("Slide Left", jesturepipe::Gesture::SlideLeft()));
-
+        addGesture(Gesture("SlideLeft", jesturepipe::Gesture::SlideLeft()));
     int slide_right =
-        addGesture(Gesture("Slide Right", jesturepipe::Gesture::SlideRight()));
+        addGesture(Gesture("SlideRight", jesturepipe::Gesture::SlideRight()));
+    addGesture(Gesture("SlideUp", jesturepipe::Gesture::SlideUp()));
+    addGesture(Gesture("SlideDown", jesturepipe::Gesture::SlideDown()));
+    int grab = addGesture(Gesture("Grab", jesturepipe::Gesture::GrabMouse()));
+    int release =
+        addGesture(Gesture("Release", jesturepipe::Gesture::GrabMouse()));
+    addGesture(Gesture("Thumbs Up", jesturepipe::Gesture::ThumbsUp()));
 
     setAction(slide_left,
               ActionsList{.action_list = {Keystroke(Qt::Key_PageUp)}});
 
     setAction(slide_right,
               ActionsList{.action_list = {Keystroke(Qt::Key_PageDown)}});
+
+    setAction(
+        grab,
+        ActionsList{
+            .action_list = {Action{actions::action::MousePress::LeftPress}},
+            .cursor_control = jesturepipe::CursorControl::Grab});
+
+    setAction(
+        release,
+        ActionsList{
+            .action_list = {Action{actions::action::MouseRelease::LeftRelease}},
+            .cursor_control = jesturepipe::CursorControl::Release});
 }
 
 }  // namespace jesture
