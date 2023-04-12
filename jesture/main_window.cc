@@ -1,7 +1,5 @@
 #include "jesture/main_window.h"
 
-#include <iostream>
-
 namespace jesture {
 
 MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
@@ -49,9 +47,9 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
     gesture_list_view = new GestureListView(resources, this);
     content_layout->addWidget(gesture_list_view);
 
-    connect(gesture_list_view, &GestureListView::add_gesture, camera_tab,
+    connect(gesture_list_view, &GestureListView::record_gesture, camera_tab,
             &SidebarItem::released);
-    connect(gesture_list_view, &GestureListView::add_gesture, pipeline_view,
+    connect(gesture_list_view, &GestureListView::record_gesture, pipeline_view,
             &PipelineView::show_recording);
     connect(pipeline_view, &PipelineView::set_recording, this,
             &MainWindow::handle_recording_update);
@@ -61,6 +59,12 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, QWidget* parent)
 
     connect(this, &MainWindow::open_recorded_gesture, recording_review,
             &RecordingReview::set_gesture);
+    connect(recording_review, &RecordingReview::cancel, gesture_tab,
+            &SidebarItem::released);
+    connect(recording_review, &RecordingReview::save_gesture, gesture_tab,
+            &SidebarItem::released);
+    connect(recording_review, &RecordingReview::save_gesture, this,
+            &MainWindow::handle_save_gesture);
 
     setCentralWidget(main);
 }
@@ -90,10 +94,14 @@ void MainWindow::handle_recording_update(bool on) {
 
 void MainWindow::get_recorded_gesture(jesturepipe::Gesture gesture,
                                       unsigned long timestamp) {
-    std::cout << "Recording finished!" << std::endl;
     content_layout->setCurrentWidget(recording_review);
     gesture_tab->setEnabled(true);
     open_recorded_gesture(gesture);
+}
+
+void MainWindow::handle_save_gesture(Gesture gesture) {
+    int gesture_id = add_gesture(gesture);
+    gesture_list_view->add_gesture(gesture_id, gesture);
 }
 
 }  // namespace jesture

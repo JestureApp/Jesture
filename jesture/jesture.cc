@@ -112,8 +112,10 @@ void setupPipeline(JesturePipeController *pipeline, Config *config) {
 void setupMainWindow(MainWindow *window, QApplication *app,
                      JesturePipeController *pipeline,
                      Resources *resourceManager, Config *config) {
+    // Application connections
     QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
 
+    // Pipeline connections
     QObject::connect(
         pipeline, &JesturePipeController::landmarksReady, window,
         [window](std::vector<Landmarks> landmarks, unsigned long timestamp) {
@@ -123,10 +125,14 @@ void setupMainWindow(MainWindow *window, QApplication *app,
                      &JesturePipeController::setRecording);
     QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
                      &MainWindow::get_recorded_gesture);
+
+    // Config connections
     QObject::connect(window, &MainWindow::camera_changed, config,
                      &Config::setCameraDevice);
+    QObject::connect(window, &MainWindow::add_gesture, config,
+                     &Config::addGesture);
 
     window->resize(1280, 720);
-
     window->setWindowIcon(resourceManager->application_icon());
+    window->setWindowTitle("Jesture");
 }

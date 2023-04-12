@@ -1,6 +1,7 @@
 #ifndef JESTURE_COMPONENTS_RECORDING_REVIEW_H
 #define JESTURE_COMPONENTS_RECORDING_REVIEW_H
 
+#include <QString>
 #include <QWidget>
 
 #include "jesture/components/gesture_visualization.h"
@@ -15,7 +16,7 @@ class RecordingReview : public QWidget {
     explicit RecordingReview(QWidget* parent = nullptr);
 
    signals:
-    void save_gesture(Gesture* gesture);
+    void save_gesture(Gesture gesture);
     void cancel();
 
    public slots:
@@ -23,10 +24,12 @@ class RecordingReview : public QWidget {
 
    private slots:
     void save();
+    void name_change(const QString& text);
 
    private:
     jesturepipe::Gesture current_gesture;
     GestureVisualization* visualization;
+    std::string name;
 };
 
 }  // namespace jesture

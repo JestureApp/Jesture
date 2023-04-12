@@ -8,6 +8,7 @@
 #include "jesture/components/recording_review.h"
 #include "jesture/components/settings_view.h"
 #include "jesture/components/sidebar.h"
+#include "jesture/jesturepipe/gesture.h"
 #include "jesture/jesturepipe/landmarks.h"
 #include "jesture/managers/camera.h"
 #include "jesture/managers/resources.h"
@@ -27,6 +28,7 @@ class MainWindow : public QMainWindow {
     void set_recording(bool on);
     void open_recorded_gesture(jesturepipe::Gesture gesture);
     void camera_changed(const QCameraDevice& device);
+    int add_gesture(Gesture gesture);
 
    public slots:
     void drawLandmarks(std::vector<Landmarks>);
@@ -38,6 +40,7 @@ class MainWindow : public QMainWindow {
 
    private slots:
     void handle_recording_update(bool on);
+    void handle_save_gesture(Gesture gesture);
 
    private:
     QStackedLayout* content_layout;

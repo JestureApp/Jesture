@@ -2,17 +2,17 @@
 
 #include <QButtonGroup>
 #include <QHBoxLayout>
-#include <QLineEdit>
+#include <QLabel>
 #include <QPushButton>
 
 namespace jesture {
-GestureListItem::GestureListItem(Gesture* gesture, Action* action,
+GestureListItem::GestureListItem(int id, Gesture gesture, Action* action,
                                  QIcon cross_icon, QWidget* parent)
-    : QWidget(parent), gesture(gesture), action(action) {
+    : QWidget(parent), id(id), gesture(gesture), action(action) {
     auto layout = new QHBoxLayout(this);
 
-    auto name = new QString(gesture->name.c_str());
-    auto name_input = new QLineEdit(*name, this);
+    auto name = new QString(gesture.name.c_str());
+    auto label = new QLabel(*name, this);
     auto button_group = new QButtonGroup(this);
     mouse_grab_button = new QRadioButton("Mouse Grab", this);
     mouse_release_button = new QRadioButton("Mouse Release", this);
@@ -27,7 +27,7 @@ GestureListItem::GestureListItem(Gesture* gesture, Action* action,
     connect(button_group, &QButtonGroup::buttonReleased, this,
             &GestureListItem::disable_key_input);
 
-    layout->addWidget(name_input);
+    layout->addWidget(label);
     layout->addWidget(mouse_grab_button);
     layout->addWidget(mouse_release_button);
     layout->addWidget(keyboard_action_button);

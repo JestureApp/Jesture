@@ -26,6 +26,7 @@ qt_cc_library(
         "//jesture/components:recording_review",
         "//jesture/components:sidebar",
         "//jesture/jesturepipe:landmarks",
+        "//jesture/jesturepipe:gesture",
         "//jesture/managers:camera",
         "//jesture/managers:resources",
         "@qt//:qt_widgets",
