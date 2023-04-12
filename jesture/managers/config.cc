@@ -135,6 +135,12 @@ void Config::init(bool from_file) {
 
         QJsonDocument gestures_document =
             QJsonDocument::fromJson(gestures_file.readAll());
+
+        QJsonObject gestures_obj = gestures_document.object();
+
+        for (auto name : gestures_obj.keys()) {
+            QJsonObject gesture_obj = gestures_obj[name].toObject();
+        }
     }
 }
 
