@@ -55,6 +55,10 @@ JesturePipeController::~JesturePipeController() { stop(); }
 
 bool JesturePipeController::isRunning() const { return pipeline.isRunning(); }
 
+bool JesturePipeController::isRecording() const {
+    return pipeline.IsRecording();
+}
+
 void JesturePipeController::start(bool use_full) {
     LOG(INFO) << "Starting pipeline";
     check_status("Pipeline start", pipeline.Start(use_full));
@@ -63,6 +67,11 @@ void JesturePipeController::start(bool use_full) {
 void JesturePipeController::stop() {
     LOG(INFO) << "Stopping pipeline";
     check_status("Pipeline stop", pipeline.Stop());
+}
+
+void JesturePipeController::setRecording(bool recording) {
+    LOG(INFO) << "Set recording to " << recording;
+    check_status("Pipeline set recording", pipeline.SetRecording(recording));
 }
 
 void JesturePipeController::setGesture(int gesture_id, Gesture gesture) {
@@ -153,6 +162,7 @@ absl::Status JesturePipeController::onGestureRecognized(
 
 absl::Status JesturePipeController::onGestureRecorded(
     jesturepipe::Gesture gesture, unsigned long timestamp) {
+    emit gestureRecorded(gesture, timestamp);
     return absl::OkStatus();
 }
 

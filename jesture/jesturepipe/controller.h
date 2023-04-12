@@ -25,16 +25,20 @@ class JesturePipeController : public QObject {
     ~JesturePipeController();
 
     bool isRunning() const;
+    bool isRecording() const;
 
    signals:
     void landmarksReady(
         std::vector<mediapipe::NormalizedLandmarkList> landmarks,
         unsigned long timestamp);
     void gestureRecognized(int gesture_id, unsigned long timestamp);
+    void gestureRecorded(jesturepipe::Gesture gesture, unsigned long timestamp);
 
    public slots:
     void start(bool use_full);
     void stop();
+
+    void setRecording(bool recording);
 
     void setGesture(int gesture_id, Gesture gesture);
     void removeGesture(int gesture_id);

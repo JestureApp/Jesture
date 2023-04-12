@@ -75,6 +75,8 @@ void MainWindow::show_gesture_list_view() {
     content_layout->setCurrentWidget(gesture_list_view);
 }
 
+void MainWindow::show_recording_view() { return; }
+
 void MainWindow::show_recording_review() {
     content_layout->setCurrentWidget(recording_review);
 }
