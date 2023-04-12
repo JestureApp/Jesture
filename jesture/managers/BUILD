@@ -24,6 +24,7 @@ qt_cc_library(
         "//jesture/jesturepipe:action",
         "//jesture/jesturepipe:gesture",
         "@com_github_google_glog//:glog",
+        "@com_google_absl//absl/types:variant",
         "@qt//:qt_core",
         "@qt//:qt_multimedia",
     ],

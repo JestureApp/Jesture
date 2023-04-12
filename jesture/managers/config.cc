@@ -9,6 +9,7 @@
 #include <QStandardPaths>
 #include <filesystem>
 
+#include "absl/types/variant.h"
 #include "glog/logging.h"
 
 namespace jesture {
@@ -52,7 +53,7 @@ void Config::clearGestures() {
     emit gesturesCleared();
 }
 
-void Config::setAction(int gesture_id, Action action) {
+void Config::setAction(int gesture_id, ActionsList action) {
     actions[gesture_id] = action;
 
     emit actionChanged(gesture_id, action);
@@ -124,7 +125,16 @@ void Config::init(bool from_file) {
     if (!fs::exists(gestures_file_path)) {
         setToDefaultGestures();
     } else {
-        // TODO
+        LOG(INFO) << "Loading gestures and actions from " << gestures_file_path;
+
+        QFile gestures_file(gestures_file_path);
+
+        if (!gestures_file.open(QIODevice::ReadOnly)) {
+            qFatal("Failed to open %s", config_file_path.c_str());
+        }
+
+        QJsonDocument gestures_document =
+            QJsonDocument::fromJson(gestures_file.readAll());
     }
 }
 
@@ -159,6 +169,51 @@ void Config::save() const {
     }
 
     settings_file.close();
+
+    QJsonObject gestures_obj;
+
+    for (const auto& [id, gesture] : gestures) {
+        QJsonObject gesture_obj;
+
+        QJsonArray frames_arr;
+
+        for (const auto& frame : *gesture.pipe_gesture.frames) {
+            QJsonObject frame_obj;
+
+            frame_obj["index_direction"] = frame.hand_shape.index_direction;
+            frame_obj["middle_direction"] = frame.hand_shape.middle_direction;
+            frame_obj["ring_direction"] = frame.hand_shape.ring_direction;
+            frame_obj["pinky_direction"] = frame.hand_shape.pinky_direction;
+            frame_obj["thumb_direction"] = frame.hand_shape.thumb_direction;
+
+            if (frame.movement_direction.has_value()) {
+                frame_obj["movement_direction"] =
+                    frame.movement_direction.value();
+            }
+
+            frames_arr.append(frame_obj);
+        }
+
+        gesture_obj["frames"] = frames_arr;
+
+        gestures_obj[gesture.name.c_str()] = gesture_obj;
+    }
+
+    QJsonDocument gestures_document(gestures_obj);
+
+    QFile gestures_file(gestures_file_path);
+
+    if (gestures_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&gestures_file);
+
+        out << gestures_document.toJson();
+
+        LOG(INFO) << "Wrote settings to file " << gestures_file_path;
+    } else {
+        LOG(ERROR) << "Failed to open " << gestures_file_path;
+    }
+
+    gestures_file.close();
 }
 
 void Config::setToDefaultSettings() {
@@ -181,9 +236,6 @@ void Config::setToDefaultGestures() {
 
     int slide_right =
         addGesture(Gesture("Slide Right", jesturepipe::Gesture::SlideRight()));
-
-    setAction(stop, {.type = actions::action::NoOp(),
-                     .cursor_control = jesturepipe::CursorControl::Toggle});
 }
 
 }  // namespace jesture

@@ -24,7 +24,7 @@ class Config : public QObject {
     void removeGesture(int gesture_id);
     void clearGestures();
 
-    void setAction(int gesture_id, Action action);
+    void setAction(int gesture_id, ActionsList action);
     void removeAction(int gesture_id);
 
     void setPipelineSettings(bool use_full);
@@ -42,7 +42,7 @@ class Config : public QObject {
     void gestureRemoved(int gesture_id);
     void gesturesCleared();
 
-    void actionChanged(int gesture_id, Action action);
+    void actionChanged(int gesture_id, ActionsList action);
     void actionRemoved(int gesture_id);
 
     void pipelineSettingsChanged(bool use_full);
@@ -54,7 +54,7 @@ class Config : public QObject {
 
     QCameraDevice camera_device;
     std::map<int, Gesture> gestures;
-    std::map<int, Action> actions;
+    std::map<int, ActionsList> actions;
 };
 
 }  // namespace jesture

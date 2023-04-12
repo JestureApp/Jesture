@@ -45,7 +45,7 @@ class JesturePipeController : public QObject {
     void removeGesture(int gesture_id);
     void clearGestures();
 
-    void setAction(int gesture_id, Action action);
+    void setAction(int gesture_id, ActionsList action);
     void removeAction(int gesture_id);
 
    private slots:

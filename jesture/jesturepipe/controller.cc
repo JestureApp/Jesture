@@ -102,8 +102,8 @@ void JesturePipeController::clearGestures() {
     LOG(INFO) << "Cleared gestures";
 }
 
-void JesturePipeController::setAction(int gesture_id, Action action) {
-    pipeline.SetAction(gesture_id, action);
+void JesturePipeController::setAction(int gesture_id, ActionsList actions) {
+    pipeline.SetAction(gesture_id, actions.action_list.front().pipeline_action);
 
     LOG(INFO) << "Added action with id " << gesture_id;
 }

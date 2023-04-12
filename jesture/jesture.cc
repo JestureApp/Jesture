@@ -14,6 +14,7 @@
 // FLAGS
 DEFINE_bool(silent, true, "Do not log any information to stderr");
 DEFINE_bool(config, true, "Whether or not to load config");
+DEFINE_bool(reset, true, "Whether or not to set config back to defaults");
 
 using namespace jesture;
 
@@ -28,6 +29,7 @@ void setupMainWindow(MainWindow *window, QApplication *app,
 void defaultFlagValues() {
     FLAGS_silent = false;
     FLAGS_config = true;
+    FLAGS_reset = false;
 }
 
 int main(int argc, char *argv[]) {
@@ -72,9 +74,9 @@ void printResources() {
 void setupApp(QApplication *app) { app->setApplicationName("Jesture"); }
 
 void setupConfig(Config *config, QApplication *app) {
-    config->init(FLAGS_config);
+    config->init(FLAGS_config && !FLAGS_reset);
 
-    if (FLAGS_config)
+    if (FLAGS_config || FLAGS_reset)
         QObject::connect(app, &QCoreApplication::aboutToQuit, config,
                          &Config::save);
 }
