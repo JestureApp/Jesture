@@ -196,6 +196,103 @@ void Config::save() const {
 
         gesture_obj["frames"] = frames_arr;
 
+        if (actions.find(id) != actions.end()) {
+            auto action_list = actions.at(id);
+            QJsonObject action_list_obj;
+
+            switch (action_list.cursor_control) {
+                case (jesturepipe::CursorControl::Grab):
+                    action_list_obj["cursor_control"] = "grab";
+                    break;
+                case (jesturepipe::CursorControl::Release):
+                    action_list_obj["cursor_control"] = "release";
+                    break;
+                case (jesturepipe::CursorControl::Toggle):
+                    action_list_obj["cursor_control"] = "toggle";
+                    break;
+                default:
+                    break;
+            }
+
+            QJsonArray actions_arr;
+            for (auto action : action_list.action_list) {
+                QJsonObject action_obj;
+
+                if (absl::holds_alternative<actions::action::NoOp>(
+                        action.pipeline_action)) {
+                    action_obj["type"] = "NoOp";
+                } else if (absl::holds_alternative<actions::action::KeysPress>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "KeysPress";
+                    action_obj["sequence"] = action.sequence.toString();
+                } else if (absl::holds_alternative<
+                               actions::action::KeysRelease>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "KeysRelease";
+                    action_obj["sequence"] = action.sequence.toString();
+                } else if (absl::holds_alternative<actions::action::Keystroke>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "Keystroke";
+                    action_obj["sequence"] = action.sequence.toString();
+                } else if (absl::holds_alternative<actions::action::MousePress>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "MousePress";
+
+                    switch (absl::get<actions::action::MousePress>(
+                        action.pipeline_action)) {
+                        case (actions::action::MousePress::LeftPress):
+                            action_obj["button"] = "left";
+                            break;
+                        case (actions::action::MousePress::MiddlePress):
+                            action_obj["button"] = "middle";
+                            break;
+                        case (actions::action::MousePress::RightPress):
+                            action_obj["button"] = "right";
+                            break;
+                    }
+                } else if (absl::holds_alternative<
+                               actions::action::MouseRelease>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "MouseRelease";
+
+                    switch (absl::get<actions::action::MouseRelease>(
+                        action.pipeline_action)) {
+                        case (actions::action::MouseRelease::LeftRelease):
+                            action_obj["button"] = "left";
+                            break;
+                        case (actions::action::MouseRelease::MiddleRelease):
+                            action_obj["button"] = "middle";
+                            break;
+                        case (actions::action::MouseRelease::RightRelease):
+                            action_obj["button"] = "right";
+                            break;
+                    }
+                } else if (absl::holds_alternative<actions::action::MouseClick>(
+                               action.pipeline_action)) {
+                    action_obj["type"] = "MouseClick";
+
+                    switch (absl::get<actions::action::MouseClick>(
+                        action.pipeline_action)) {
+                        case (actions::action::MouseClick::LeftClick):
+                            action_obj["button"] = "left";
+                            break;
+                        case (actions::action::MouseClick::MiddleClick):
+                            action_obj["button"] = "middle";
+                            break;
+                        case (actions::action::MouseClick::RightClick):
+                            action_obj["button"] = "right";
+                            break;
+                    }
+                }
+
+                actions_arr.push_back(action_obj);
+            }
+
+            action_list_obj["actions"] = actions_arr;
+
+            gesture_obj["action_mapping"] = action_list_obj;
+        }
+
         gestures_obj[gesture.name.c_str()] = gesture_obj;
     }
 
