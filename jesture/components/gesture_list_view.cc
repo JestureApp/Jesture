@@ -38,11 +38,11 @@ GestureListView::GestureListView(Resources* resources, Config* config,
 }
 
 void GestureListView::add_gesture(int id, Gesture gesture) {
-    auto gesture_list_item = new GestureListItem(id, gesture, NULL, cross_icon);
-    gesture_list_item->setStyleSheet(
-        "GestureListItem { border-bottom: 1px solid gray; }");
+    auto gesture_list_item = new GestureListItem(id, gesture, cross_icon);
     list_layout->addWidget(gesture_list_item);
 
+    connect(gesture_list_item, &GestureListItem::update_action, config,
+            &Config::setAction);
     connect(gesture_list_item, &GestureListItem::delete_gesture, config,
             &Config::removeGesture);
     connect(gesture_list_item, &GestureListItem::delete_gesture, this,

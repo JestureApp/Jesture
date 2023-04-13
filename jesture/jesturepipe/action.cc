@@ -16,6 +16,11 @@ actions::action::KeySequence keySequenceFromQt(QKeySequence keys) {
     return sequence.value();
 }
 
+Action NoOp() {
+    return Action{.pipeline_action = actions::action::NoOp(),
+                  .sequence = QKeySequence()};
+}
+
 Action Keystroke(const QKeySequence &keys) {
     return Action{
         .pipeline_action = actions::action::Keystroke{keySequenceFromQt(keys)},

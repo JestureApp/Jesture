@@ -14,6 +14,8 @@ typedef struct Action {
     QKeySequence sequence;
 } Action;
 
+Action NoOp();
+
 Action Keystroke(const QKeySequence &keys);
 
 Action KeysPress(const QKeySequence &keys);
