@@ -122,6 +122,11 @@ void GestureListItem::initialize_fields(ActionsList action_list) {
             cursor_combo->setCurrentIndex(3);
     }
 
+    if (action_list.action_list.empty()) {
+        action_combo->setCurrentIndex(0);
+        return;
+    }
+
     Action action = action_list.action_list[0];
     if (absl::holds_alternative<actions::action::NoOp>(
             action.pipeline_action)) {

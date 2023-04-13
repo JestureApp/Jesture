@@ -65,6 +65,17 @@ MainWindow::MainWindow(Camera* camera, Resources* resources, Config* config,
             &MainWindow::handle_save_gesture);
     connect(this, &MainWindow::add_gesture, config, &Config::addGesture);
 
+    auto camera_shortcut = new QShortcut(QKeySequence::Cancel, this);
+    auto settings_shortcut = new QShortcut(QKeySequence::Preferences, this);
+    auto gesture_shortcut = new QShortcut(QKeySequence::FindNext, this);
+
+    connect(camera_shortcut, &QShortcut::activated, camera_tab,
+            &SidebarItem::released);
+    connect(settings_shortcut, &QShortcut::activated, settings_tab,
+            &SidebarItem::released);
+    connect(gesture_shortcut, &QShortcut::activated, gesture_tab,
+            &SidebarItem::released);
+
     setCentralWidget(main);
 }
 

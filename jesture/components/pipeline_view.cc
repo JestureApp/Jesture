@@ -2,7 +2,9 @@
 
 #include <QBrush>
 #include <QHBoxLayout>
+#include <QKeySequence>
 #include <QPen>
+#include <QShortcut>
 #include <QSizePolicy>
 
 namespace jesture {
@@ -63,12 +65,18 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     auto layout = new QHBoxLayout(this);
     hint = new QLabel("Recording in 3...", this);
     stop_recording_button = new QPushButton("Stop Recording", this);
+    auto stop_recording_shortcut = new QShortcut(QKeySequence("Space"), this);
+    auto stop_recording_shortcut_2 = new QShortcut(QKeySequence::Cancel, this);
 
     hint->setWordWrap(true);
     hint->setStyleSheet("color: red");
     stop_recording_button->setStyleSheet("color: red");
 
     connect(stop_recording_button, &QPushButton::released, this,
+            &PipelineView::hide_recording);
+    connect(stop_recording_shortcut, &QShortcut::activated, this,
+            &PipelineView::hide_recording);
+    connect(stop_recording_shortcut_2, &QShortcut::activatedAmbiguously, this,
             &PipelineView::hide_recording);
 
     hide_recording();

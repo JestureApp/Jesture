@@ -1,8 +1,10 @@
 #include "jesture/components/recording_review.h"
 
+#include <QKeySequence>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QShortcut>
 #include <QVBoxLayout>
 
 namespace jesture {
@@ -24,9 +26,16 @@ RecordingReview::RecordingReview(QWidget* parent) : QWidget(parent) {
     layout->addWidget(accept_button);
     layout->addWidget(reject_button);
 
+    auto accept_shortcut =
+        new QShortcut(QKeySequence::InsertParagraphSeparator, this);
+    auto reject_shortcut = new QShortcut(QKeySequence::Cancel, this);
     connect(accept_button, &QPushButton::released, this,
             &RecordingReview::save);
+    connect(accept_shortcut, &QShortcut::activated, this,
+            &RecordingReview::save);
     connect(reject_button, &QPushButton::released, this,
+            &RecordingReview::cancel);
+    connect(reject_shortcut, &QShortcut::activatedAmbiguously, this,
             &RecordingReview::cancel);
     connect(name_input, &QLineEdit::textChanged, this,
             &RecordingReview::name_change);
