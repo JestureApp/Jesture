@@ -65,6 +65,8 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
     stop_recording_button = new QPushButton("Stop Recording", this);
 
     hint->setWordWrap(true);
+    hint->setStyleSheet("color: red");
+    stop_recording_button->setStyleSheet("color: red");
 
     connect(stop_recording_button, &QPushButton::released, this,
             &PipelineView::hide_recording);
@@ -73,6 +75,11 @@ PipelineView::PipelineView(Camera* camera, QWidget* parent)
 
     layout->addWidget(hint);
     layout->addWidget(stop_recording_button);
+    layout->setAlignment(Qt::AlignTop);
+
+    hint->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    stop_recording_button->setSizePolicy(QSizePolicy::Fixed,
+                                         QSizePolicy::Fixed);
 }
 
 QSize PipelineView::sizeHint() const { return sceneRect().size().toSize(); }

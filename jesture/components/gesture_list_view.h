@@ -2,7 +2,6 @@
 #define JESTURE_COMPONENTS_GESTURE_LIST_VIEW_H
 
 #include <QIcon>
-#include <QList>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -27,8 +26,7 @@ class GestureListView : public QWidget {
     void delete_list_item();
 
    private:
-    QVBoxLayout* layout;
-    QList<GestureListItem> gesture_list;
+    QVBoxLayout* list_layout;
     QIcon cross_icon;
     Config* config;
 };

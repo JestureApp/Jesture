@@ -28,9 +28,7 @@ class GestureListItem : public QWidget {
     int id;
     Gesture gesture;
     Action* action;
-    QRadioButton* mouse_grab_button;
-    QRadioButton* mouse_release_button;
-    QRadioButton* keyboard_action_button;
+    QRadioButton* no_key_button;
     QKeySequenceEdit* keyboard_action_input;
 };
 

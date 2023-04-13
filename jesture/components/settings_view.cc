@@ -10,13 +10,15 @@
 
 namespace jesture {
 SettingsView::SettingsView(Config* config, QWidget* parent) : QWidget(parent) {
-    auto parent_layout = new QVBoxLayout(this);
     auto layout = new QGridLayout(this);
-    parent_layout->addLayout(layout);
     layout->setContentsMargins(20, 20, 20, 20);
-    parent_layout->addSpacing(100);
+    layout->setAlignment(Qt::AlignTop);
 
     auto title = new QLabel("Settings", this);
+
+    title->setStyleSheet(
+        "font-size: 24px; font-weight: 700; margin-bottom: 12px;");
+
     layout->addWidget(title, 0, 0, 1, 2);
 
     auto accuracy_label = new QLabel("Gesture Recognition Accuracy", this);
@@ -30,6 +32,7 @@ SettingsView::SettingsView(Config* config, QWidget* parent) : QWidget(parent) {
     accuracy_combo->addItem("Full");
     accuracy_combo->addItem("Diminished");
     accuracy_explanation->setWordWrap(true);
+    accuracy_explanation->setStyleSheet("color: gray; font-weight: 400;");
 
     connect(accuracy_combo, &QComboBox::currentIndexChanged, this,
             &SettingsView::combo_index_to_accuracy);
@@ -69,6 +72,7 @@ SettingsView::SettingsView(Config* config, QWidget* parent) : QWidget(parent) {
 
     camera_zoom_label->setWordWrap(true);
     camera_zoom_explanation->setWordWrap(true);
+    camera_zoom_explanation->setStyleSheet("color: gray; font-weight: 400;");
 
     layout->addWidget(camera_zoom_label, 4, 0);
     layout->addWidget(camera_zoom_slider, 4, 1);
