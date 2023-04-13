@@ -30,7 +30,8 @@ Action KeysRelease(const QKeySequence &keys);
 
 typedef struct ActionsList {
     std::vector<Action> action_list;
-    jesturepipe::CursorControl cursor_control;
+    jesturepipe::CursorControl cursor_control =
+        jesturepipe::CursorControl::None;
 } ActionsList;
 
 }  // namespace jesture

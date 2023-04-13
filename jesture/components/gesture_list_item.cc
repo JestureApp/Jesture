@@ -80,7 +80,7 @@ void GestureListItem::handle_action_type(int index) {
 
 jesturepipe::CursorControl GestureListItem::get_cursor_control() {
     switch (cursor_combo->currentIndex()) {
-        default:
+        case 0:
             return jesturepipe::CursorControl::None;
         case 1:
             return jesturepipe::CursorControl::Grab;
@@ -93,7 +93,7 @@ jesturepipe::CursorControl GestureListItem::get_cursor_control() {
 
 Action GestureListItem::get_action() {
     switch (action_combo->currentIndex()) {
-        default:
+        case 0:
             return NoOp();
         case 1:
             return MouseClick(mouse_combo->currentIndex());
@@ -114,12 +114,16 @@ void GestureListItem::initialize_fields(ActionsList action_list) {
     switch (action_list.cursor_control) {
         case jesturepipe::CursorControl::None:
             cursor_combo->setCurrentIndex(0);
+            break;
         case jesturepipe::CursorControl::Grab:
             cursor_combo->setCurrentIndex(1);
+            break;
         case jesturepipe::CursorControl::Release:
             cursor_combo->setCurrentIndex(2);
+            break;
         case jesturepipe::CursorControl::Toggle:
             cursor_combo->setCurrentIndex(3);
+            break;
     }
 
     if (action_list.action_list.empty()) {
