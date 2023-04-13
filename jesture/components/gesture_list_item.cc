@@ -1,128 +1,196 @@
 #include "jesture/components/gesture_list_item.h"
 
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QGridLayout>
+#include <QComboBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QSizePolicy>
 
 namespace jesture {
-GestureListItem::GestureListItem(int id, Gesture gesture, QIcon cross_icon,
-                                 QWidget* parent)
+GestureListItem::GestureListItem(int id, Gesture gesture, ActionsList action,
+                                 QIcon cross_icon, QWidget* parent)
     : QWidget(parent), id(id), gesture(gesture) {
-    auto layout = new QGridLayout(this);
+    auto layout = new QHBoxLayout(this);
     layout->setAlignment(Qt::AlignTop);
 
     auto name = new QString(gesture.name.c_str());
     auto label = new QLabel(*name, this);
-
     label->setWordWrap(true);
 
-    layout->addWidget(label, 0, 0, 4, 1);
+    cursor_combo = new QComboBox(this);
+    cursor_combo->addItem("No Cursor Control");
+    cursor_combo->addItem("Cursor Grab");
+    cursor_combo->addItem("Cursor Release");
+    cursor_combo->addItem("Toggle Cursor Grab");
 
-    no_mouse_button = new QRadioButton("No Mouse Action", this);
-    mouse_grab_button = new QRadioButton("Mouse Grab", this);
-    mouse_release_button = new QRadioButton("Mouse Release", this);
-    mouse_toggle_button = new QRadioButton("Toggle Mouse Grab", this);
+    action_combo = new QComboBox(this);
+    action_combo->addItem("No Actions");
+    action_combo->addItem("Mouse Click");
+    action_combo->addItem("Mouse Hold");
+    action_combo->addItem("Mouse Release");
+    action_combo->addItem("Key Stroke");
+    action_combo->addItem("Key Hold");
+    action_combo->addItem("Key Release");
 
-    auto mouse_button_group = new QButtonGroup(this);
-    mouse_button_group->addButton(no_mouse_button);
-    mouse_button_group->addButton(mouse_grab_button);
-    mouse_button_group->addButton(mouse_release_button);
-    mouse_button_group->addButton(mouse_toggle_button);
-
-    connect(mouse_button_group, &QButtonGroup::buttonReleased, this,
-            &GestureListItem::handle_mouse_buttons);
-
-    layout->addWidget(no_mouse_button, 0, 1);
-    layout->addWidget(mouse_grab_button, 1, 1);
-    layout->addWidget(mouse_release_button, 2, 1);
-    layout->addWidget(mouse_toggle_button, 3, 1);
-
-    left_click_button = new QCheckBox("Left Click", this);
-    middle_click_button = new QCheckBox("Middle Click", this);
-    right_click_button = new QCheckBox("Right Click", this);
-
-    layout->addWidget(left_click_button, 0, 2);
-    layout->addWidget(middle_click_button, 1, 2);
-    layout->addWidget(right_click_button, 2, 2);
-
-    no_key_button = new QRadioButton("No Keyboard Action", this);
-    key_stroke_button = new QRadioButton("Key Stroke", this);
-    key_hold_button = new QRadioButton("Key Hold", this);
-    key_release_button = new QRadioButton("Key Release", this);
-
-    auto key_button_group = new QButtonGroup(this);
-    key_button_group->addButton(no_key_button);
-    key_button_group->addButton(key_stroke_button);
-    key_button_group->addButton(key_hold_button);
-    key_button_group->addButton(key_release_button);
-
-    connect(key_button_group, &QButtonGroup::buttonReleased, this,
-            &GestureListItem::handle_key_buttons);
-
-    no_key_button->setChecked(true);
-
-    layout->addWidget(no_key_button, 0, 3);
-    layout->addWidget(key_stroke_button, 1, 3);
-    layout->addWidget(key_hold_button, 2, 3);
-    layout->addWidget(key_release_button, 3, 3);
+    mouse_combo = new QComboBox(this);
+    mouse_combo->addItem("Left Click");
+    mouse_combo->addItem("Middle Click");
+    mouse_combo->addItem("Right Click");
 
     keyboard_action_input = new QKeySequenceEdit(this);
 
-    connect(keyboard_action_input, &QKeySequenceEdit::keySequenceChanged, this,
-            &GestureListItem::propogate_action);
-
-    layout->addWidget(keyboard_action_input, 0, 4, 4, 1);
-
     auto delete_button = new QPushButton(cross_icon, "", this);
 
+    initialize_fields(action);
+
+    connect(cursor_combo, &QComboBox::currentIndexChanged, this,
+            &GestureListItem::propogate_action);
+    connect(action_combo, &QComboBox::currentIndexChanged, this,
+            &GestureListItem::propogate_action);
+    connect(action_combo, &QComboBox::currentIndexChanged, this,
+            &GestureListItem::handle_action_type);
+    connect(mouse_combo, &QComboBox::currentIndexChanged, this,
+            &GestureListItem::propogate_action);
+    connect(keyboard_action_input, &QKeySequenceEdit::keySequenceChanged, this,
+            &GestureListItem::propogate_action);
     connect(delete_button, &QPushButton::released, this,
             &GestureListItem::delete_this_item);
 
-    layout->addWidget(delete_button, 0, 5, 4, 1);
+    layout->addWidget(label);
+    layout->addWidget(cursor_combo);
+    layout->addWidget(action_combo);
+    layout->addWidget(mouse_combo);
+    layout->addWidget(keyboard_action_input);
+    layout->addWidget(delete_button);
 }
 
 void GestureListItem::delete_this_item() { delete_gesture(id); }
 
-void GestureListItem::handle_mouse_buttons(QAbstractButton* button) {
-    if (button == no_mouse_button) {
-        mouse_action = jesturepipe::CursorControl::None;
-    } else if (button == mouse_grab_button) {
-        mouse_action = jesturepipe::CursorControl::Grab;
-    } else if (button == mouse_release_button) {
-        mouse_action = jesturepipe::CursorControl::Release;
-    } else if (button == mouse_toggle_button) {
-        mouse_action = jesturepipe::CursorControl::Toggle;
-    }
-
-    propogate_action();
-}
-
-void GestureListItem::handle_key_buttons(QAbstractButton* button) {
-    if (button == no_key_button) {
+void GestureListItem::handle_action_type(int index) {
+    if (index == 0) {
+        mouse_combo->setEnabled(false);
+        keyboard_action_input->setEnabled(false);
+    } else if (index <= 3) {
+        mouse_combo->setEnabled(true);
         keyboard_action_input->setEnabled(false);
     } else {
+        mouse_combo->setEnabled(false);
         keyboard_action_input->setEnabled(true);
     }
+}
 
-    if (button == no_key_button) {
-        key_action = NoOp();
-    } else if (button == key_stroke_button) {
-        key_action = Keystroke(keyboard_action_input->keySequence());
-    } else if (button == key_hold_button) {
-        key_action = KeysPress(keyboard_action_input->keySequence());
-    } else if (button == key_release_button) {
-        key_action = KeysRelease(keyboard_action_input->keySequence());
+jesturepipe::CursorControl GestureListItem::get_cursor_control() {
+    switch (cursor_combo->currentIndex()) {
+        default:
+            return jesturepipe::CursorControl::None;
+        case 1:
+            return jesturepipe::CursorControl::Grab;
+        case 2:
+            return jesturepipe::CursorControl::Release;
+        case 3:
+            return jesturepipe::CursorControl::Toggle;
+    }
+}
+
+Action GestureListItem::get_action() {
+    switch (action_combo->currentIndex()) {
+        default:
+            return NoOp();
+        case 1:
+            return MouseClick(mouse_combo->currentIndex());
+        case 2:
+            return MousePress(mouse_combo->currentIndex());
+        case 3:
+            return MouseRelease(mouse_combo->currentIndex());
+        case 4:
+            return Keystroke(keyboard_action_input->keySequence());
+        case 5:
+            return KeysPress(keyboard_action_input->keySequence());
+        case 6:
+            return KeysRelease(keyboard_action_input->keySequence());
+    }
+}
+
+void GestureListItem::initialize_fields(ActionsList action_list) {
+    switch (action_list.cursor_control) {
+        case jesturepipe::CursorControl::None:
+            cursor_combo->setCurrentIndex(0);
+        case jesturepipe::CursorControl::Grab:
+            cursor_combo->setCurrentIndex(1);
+        case jesturepipe::CursorControl::Release:
+            cursor_combo->setCurrentIndex(2);
+        case jesturepipe::CursorControl::Toggle:
+            cursor_combo->setCurrentIndex(3);
     }
 
-    propogate_action();
+    Action action = action_list.action_list[0];
+    if (absl::holds_alternative<actions::action::NoOp>(
+            action.pipeline_action)) {
+        action_combo->setCurrentIndex(0);
+    } else if (absl::holds_alternative<actions::action::MouseClick>(
+                   action.pipeline_action)) {
+        action_combo->setCurrentIndex(1);
+        switch (
+            absl::get<actions::action::MouseClick>(action.pipeline_action)) {
+            case actions::action::MouseClick::LeftClick:
+                mouse_combo->setCurrentIndex(0);
+                break;
+            case actions::action::MouseClick::MiddleClick:
+                mouse_combo->setCurrentIndex(1);
+                break;
+            case actions::action::MouseClick::RightClick:
+                mouse_combo->setCurrentIndex(2);
+                break;
+        }
+    } else if (absl::holds_alternative<actions::action::MousePress>(
+                   action.pipeline_action)) {
+        action_combo->setCurrentIndex(2);
+        switch (
+            absl::get<actions::action::MousePress>(action.pipeline_action)) {
+            case actions::action::MousePress::LeftPress:
+                mouse_combo->setCurrentIndex(0);
+                break;
+            case actions::action::MousePress::MiddlePress:
+                mouse_combo->setCurrentIndex(1);
+                break;
+            case actions::action::MousePress::RightPress:
+                mouse_combo->setCurrentIndex(2);
+                break;
+        }
+    } else if (absl::holds_alternative<actions::action::MouseRelease>(
+                   action.pipeline_action)) {
+        action_combo->setCurrentIndex(3);
+        switch (
+            absl::get<actions::action::MouseRelease>(action.pipeline_action)) {
+            case actions::action::MouseRelease::LeftRelease:
+                mouse_combo->setCurrentIndex(0);
+                break;
+            case actions::action::MouseRelease::MiddleRelease:
+                mouse_combo->setCurrentIndex(1);
+                break;
+            case actions::action::MouseRelease::RightRelease:
+                mouse_combo->setCurrentIndex(2);
+                break;
+        }
+    } else if (absl::holds_alternative<actions::action::Keystroke>(
+                   action.pipeline_action)) {
+        action_combo->setCurrentIndex(4);
+        keyboard_action_input->setKeySequence(action.sequence);
+    } else if (absl::holds_alternative<actions::action::KeysPress>(
+                   action.pipeline_action)) {
+        action_combo->setCurrentIndex(5);
+        keyboard_action_input->setKeySequence(action.sequence);
+    } else {
+        action_combo->setCurrentIndex(6);
+        keyboard_action_input->setKeySequence(action.sequence);
+    }
+
+    handle_action_type(action_combo->currentIndex());
 }
 
 void GestureListItem::propogate_action() {
     std::vector<Action> action_list;
-    action_list.push_back(key_action);
-    update_action(id, ActionsList{action_list, .cursor_control = mouse_action});
+    action_list.push_back(get_action());
+    update_action(
+        id, ActionsList{action_list, .cursor_control = get_cursor_control()});
 }
 }  // namespace jesture

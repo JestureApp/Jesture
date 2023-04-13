@@ -16,6 +16,12 @@ typedef struct Action {
 
 Action NoOp();
 
+Action MouseClick(int mouse_button);
+
+Action MousePress(int mouse_button);
+
+Action MouseRelease(int mouse_button);
+
 Action Keystroke(const QKeySequence &keys);
 
 Action KeysPress(const QKeySequence &keys);

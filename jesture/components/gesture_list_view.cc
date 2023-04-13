@@ -35,10 +35,27 @@ GestureListView::GestureListView(Resources* resources, Config* config,
     list_layout->setAlignment(Qt::AlignTop);
 
     cross_icon = resources->cross_icon();
+
+    for (const auto& [id, gesture] : config->getGestures()) {
+        if (config->getActions().find(id) == config->getActions().end()) {
+            add_gesture(id, gesture);
+        } else {
+            add_gesture(id, gesture, config->getActions().at(id));
+        }
+    }
 }
 
 void GestureListView::add_gesture(int id, Gesture gesture) {
-    auto gesture_list_item = new GestureListItem(id, gesture, cross_icon);
+    std::vector<Action> action_list;
+    action_list.push_back(NoOp());
+    add_gesture(id, gesture,
+                ActionsList{action_list, .cursor_control =
+                                             jesturepipe::CursorControl::None});
+}
+
+void GestureListView::add_gesture(int id, Gesture gesture, ActionsList action) {
+    auto gesture_list_item =
+        new GestureListItem(id, gesture, action, cross_icon);
     list_layout->addWidget(gesture_list_item);
 
     connect(gesture_list_item, &GestureListItem::update_action, config,

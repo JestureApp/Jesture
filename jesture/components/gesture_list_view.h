@@ -23,6 +23,7 @@ class GestureListView : public QWidget {
 
    public slots:
     void add_gesture(int id, Gesture gesture);
+    void add_gesture(int id, Gesture gesture, ActionsList action);
     void delete_list_item();
 
    private:
