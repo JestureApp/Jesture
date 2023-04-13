@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
     auto config = new Config(&app);
     auto camera = new Camera(&app);
     auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
-    setupPipeline(pipeline, config);
     setupConfig(config, &app);
+    setupPipeline(pipeline, config);
     setupCamera(camera, config);
 
     auto window = new MainWindow(camera, &resources, config);
@@ -89,6 +89,14 @@ void setupCamera(Camera *camera, Config *config) {
 }
 
 void setupPipeline(JesturePipeController *pipeline, Config *config) {
+    for (const auto &[id, gesture] : config->getGestures()) {
+        pipeline->setGesture(id, gesture);
+    }
+
+    for (const auto &[id, action] : config->getActions()) {
+        pipeline->setAction(id, action);
+    }
+
     QObject::connect(config, &Config::gestureChanged, pipeline,
                      &JesturePipeController::setGesture);
 

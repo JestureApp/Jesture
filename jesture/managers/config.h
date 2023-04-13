@@ -17,6 +17,9 @@ class Config : public QObject {
     explicit Config(QObject* parent = nullptr);
     QCameraDevice cameraDevice() const;
 
+    const std::map<int, Gesture>& getGestures() const;
+    const std::map<int, ActionsList>& getActions() const;
+
    public slots:
     void setCameraDevice(QCameraDevice camera_device);
 
