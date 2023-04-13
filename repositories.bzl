@@ -20,21 +20,33 @@ def jesture_repositories():
     )
 
     maybe(
+        http_archive,
+        name = "rules_pkg",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.9.0/rules_pkg-0.9.0.tar.gz",
+            "https://github.com/bazelbuild/rules_pkg/releases/download/0.9.0/rules_pkg-0.9.0.tar.gz",
+        ],
+        sha256 = "335632735e625d408870ec3e361e192e99ef7462315caa887417f4d88c4c8fb8",
+    )
+
+    maybe(
         git_repository,
         name = "actions",
         remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
-        commit = "8ebd373380467080dd2508864ce7d43a4abef58a",
-        # shallow_since = "1677290156 -0700",
-        # tag = "v0.1.1",
+        commit = "0a2b9cbfb9fd579b1581c31241543bffdc305a69",
     )
+
+    # maybe(
+    #     native.local_repository,
+    #     name = "actions",
+    #     path = "../Actions",
+    # )
 
     maybe(
         git_repository,
         name = "jesturepipe",
         remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "406e73c824f2578390445171b1071be9d8167c16",
-        # shallow_since = "1677290156 -0700",
-        # tag = "v0.1.1",
+        commit = "632ca3728f1d4c94f1f5714876d78e85475218fb",
     )
 
     # maybe(
@@ -42,3 +54,17 @@ def jesture_repositories():
     #     name = "jesturepipe",
     #     path = "../JesturePipe",
     # )
+
+    http_archive(
+        name = "com_github_gflags_gflags",
+        sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
+        strip_prefix = "gflags-2.2.2",
+        urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
+    )
+
+    http_archive(
+        name = "com_github_google_glog",
+        sha256 = "122fb6b712808ef43fbf80f75c52a21c9760683dae470154f02bddfc61135022",
+        strip_prefix = "glog-0.6.0",
+        urls = ["https://github.com/google/glog/archive/v0.6.0.zip"],
+    )

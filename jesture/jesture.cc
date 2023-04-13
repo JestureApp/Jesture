@@ -1,107 +1,139 @@
+#include <gflags/gflags.h>
+
+#include <QtCore>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QSystemTrayIcon>
+#include <iostream>
 
-#include "config_manager.h"
-#include "jesture/jesturepipe/controller.h"
-#include "jesture/jesturepipe/settings.h"
-#include "jesturepipe/gesture/gesture.h"
-#include "main_window.h"
-#include "tools/cpp/runfiles/runfiles.h"
+#include "glog/logging.h"
+#include "jesture/main_window.h"
+#include "jesture/managers/camera.h"
+#include "jesture/managers/config.h"
+#include "jesture/managers/resources.h"
+#include "jesturepipe/controller.h"
 
-using bazel::tools::cpp::runfiles::Runfiles;
+// FLAGS
+DEFINE_bool(silent, true, "Do not log any information to stderr");
+DEFINE_bool(config, true, "Whether or not to load config");
+DEFINE_bool(reset, true, "Whether or not to set config back to defaults");
+
 using namespace jesture;
 
-JesturePipeInit getInit(Runfiles *runfiles) {
-    std::string palm_model_full_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/palm_detection/"
-        "palm_detection_full.tflite");
+void setupApp(QApplication *app);
+void setupConfig(Config *config, QApplication *app);
+void setupCamera(Camera *camera, Config *config);
+void setupPipeline(JesturePipeController *pipeline, Config *config);
+void setupMainWindow(MainWindow *window, QApplication *app,
+                     JesturePipeController *pipeline,
+                     Resources *resourceManager, Config *config);
 
-    std::string palm_model_lite_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/palm_detection/"
-        "palm_detection_lite.tflite");
-
-    std::string landmark_model_full_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_full.tflite");
-
-    std::string landmark_model_lite_path = runfiles->Rlocation(
-        "mediapipe/mediapipe/modules/hand_landmark/hand_landmark_lite.tflite");
-
-    return JesturePipeInit{palm_model_full_path, palm_model_lite_path,
-                           landmark_model_full_path, landmark_model_lite_path};
+void defaultFlagValues() {
+    FLAGS_silent = false;
+    FLAGS_config = true;
+    FLAGS_reset = false;
 }
 
-int main(int argc, char **argv) {
-    // Mediapipe/Jesturepipe logging
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
-    // Create app
+    defaultFlagValues();
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+    FLAGS_alsologtostderr = FLAGS_silent ? 0 : 1;
+    Resources resources(argv[0]);
+
+    auto pipeline_config = JesturePipeController::makeConfig(resources);
+
+    LOG(INFO) << "Starting application";
     QApplication app(argc, argv);
-    app.setApplicationName("Jesture");
+    setupApp(&app);
 
-    // Set app icon
-    auto app_icon = new QIcon("icons/settings.svg");
-    app.setWindowIcon(*app_icon);
+    auto config = new Config(&app);
+    auto camera = new Camera(&app);
+    auto pipeline = new JesturePipeController(camera, pipeline_config, &app);
+    setupConfig(config, &app);
+    setupPipeline(pipeline, config);
+    setupCamera(camera, config);
 
-    // Setup runfiles for JesturePipe tflite files
-    std::string error;
-    auto runfiles = Runfiles::Create(argv[0], &error);
-    if (runfiles == nullptr) {
-        std::cout << "Error: " << error << std::endl;
-        return 1;
-    }
+    auto window = new MainWindow(camera, &resources, config);
+    setupMainWindow(window, &app, pipeline, &resources, config);
 
-    // Create app components
-    auto config_manager = new ConfigManager();
-    auto jesturepipe_controller =
-        new JesturePipeController(getInit(runfiles), &app);
-    auto window = new MainWindow(config_manager->get_settings(),
-                                 config_manager->get_gestures());
-
-    // Clear runfiles memory
-    delete runfiles;
-
-    // Qt Signal-Slot Connections
-    jesturepipe_controller->connect(&app, &QApplication::aboutToQuit,
-                                    jesturepipe_controller,
-                                    &JesturePipeController::Stop);
-    // jesturepipe_controller->connect(
-    //     jesturepipe_controller, &JesturePipeController::gestureRecorded,
-    //     jesturepipe_controller, &JesturePipeController::addGesture);
-    jesturepipe_controller->connect(jesturepipe_controller,
-                                    &JesturePipeController::gestureRecorded,
-                                    window, &MainWindow::add_gesture);
-    config_manager->connect(&app, &QApplication::aboutToQuit, config_manager,
-                            &ConfigManager::save);
-    config_manager->connect(
-        config_manager, &ConfigManager::settings_to_controller,
-        jesturepipe_controller, &JesturePipeController::updateSettings);
-    window->connect(window, &MainWindow::quit, &app, &QApplication::quit);
-    window->connect(window, &MainWindow::toggle_recording,
-                    jesturepipe_controller,
-                    &JesturePipeController::toggleRecording);
-    window->connect(window, &MainWindow::update_camera_setting, config_manager,
-                    &ConfigManager::update_camera_setting);
-
-    // Initialize app components
-    jesturepipe_controller->Start(config_manager->get_settings());
-    int i = 0;
-    for (auto gesture : config_manager->get_gestures()) {
-        jesturepipe_controller->addGesture(i, gesture);
-        i++;
-    }
-    window->setFixedSize(1280, 720);
     window->show();
 
-    // Debug logging to detect gestures emitted
-    QObject::connect(
-        jesturepipe_controller, &JesturePipeController::gestureRecognizer,
-        [](int id) { qInfo() << "recognized gesture with id" << id; });
-    QObject::connect(jesturepipe_controller,
-                     &JesturePipeController::gestureRecorded,
-                     [](jesturepipe::Gesture gesture) {
-                         qInfo() << "Got recorded gesture with"
-                                 << gesture.frames->size() << "frames";
-                     });
+    pipeline->start(false);
 
     return app.exec();
+}
+
+void printResources() {
+    QDirIterator it(":", QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        qDebug() << it.next();
+    }
+}
+
+void setupApp(QApplication *app) { app->setApplicationName("Jesture"); }
+
+void setupConfig(Config *config, QApplication *app) {
+    config->init(FLAGS_config && !FLAGS_reset);
+
+    if (FLAGS_config || FLAGS_reset)
+        QObject::connect(app, &QCoreApplication::aboutToQuit, config,
+                         &Config::save);
+}
+
+void setupCamera(Camera *camera, Config *config) {
+    camera->setDevice(config->cameraDevice());
+
+    QObject::connect(config, &Config::cameraDeviceChanged, camera,
+                     &Camera::setDevice);
+}
+
+void setupPipeline(JesturePipeController *pipeline, Config *config) {
+    for (const auto &[id, gesture] : config->getGestures()) {
+        pipeline->setGesture(id, gesture);
+    }
+
+    for (const auto &[id, action] : config->getActions()) {
+        pipeline->setAction(id, action);
+    }
+
+    QObject::connect(config, &Config::gestureChanged, pipeline,
+                     &JesturePipeController::setGesture);
+
+    QObject::connect(config, &Config::gestureRemoved, pipeline,
+                     &JesturePipeController::removeGesture);
+
+    QObject::connect(config, &Config::gesturesCleared, pipeline,
+                     &JesturePipeController::clearGestures);
+
+    QObject::connect(config, &Config::actionChanged, pipeline,
+                     &JesturePipeController::setAction);
+
+    QObject::connect(config, &Config::actionRemoved, pipeline,
+                     &JesturePipeController::removeAction);
+
+    QObject::connect(config, &Config::pipelineSettingsChanged, pipeline,
+                     &JesturePipeController::restart);
+}
+
+void setupMainWindow(MainWindow *window, QApplication *app,
+                     JesturePipeController *pipeline,
+                     Resources *resourceManager, Config *config) {
+    // Application connections
+    QObject::connect(window, &MainWindow::quit, app, &QApplication::quit);
+
+    // Pipeline connections
+    QObject::connect(
+        pipeline, &JesturePipeController::landmarksReady, window,
+        [window](std::vector<Landmarks> landmarks, unsigned long timestamp) {
+            window->drawLandmarks(landmarks);
+        });
+    QObject::connect(window, &MainWindow::set_recording, pipeline,
+                     &JesturePipeController::setRecording);
+    QObject::connect(pipeline, &JesturePipeController::gestureRecorded, window,
+                     &MainWindow::get_recorded_gesture);
+
+    window->resize(1280, 720);
+    window->setWindowIcon(resourceManager->application_icon());
+    window->setWindowTitle("Jesture");
 }

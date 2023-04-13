@@ -1,113 +1,193 @@
 #include "jesture/jesturepipe/controller.h"
 
-#include <QDebug>
+#include <QVideoFrame>
+#include <QVideoSink>
 
 #include "absl/status/status.h"
+#include "glog/logging.h"
+#include "mediapipe/framework/formats/image_frame.h"
 #include "mediapipe/framework/formats/image_frame_opencv.h"
-#include "mediapipe/framework/port/opencv_imgproc_inc.h"
+#include "mediapipe/framework/port/opencv_core_inc.h"
 
 namespace jesture {
-namespace {
-const char OutputFrameStream[] = "annotated_frame";
-const char AddGestureStream[] = "add_gesture";
-const char IsRecordingStream[] = "is_recording";
-const char RecognizedGestureStream[] = "recognized_gestures";
-const char RecordedGestureStream[] = "recorded_gestures";
-}  // namespace
 
-void check_status(absl::Status status) {
-    if (!status.ok()) qFatal("%s", status.ToString().c_str());
+void check_status(const char* op, absl::Status status) {
+    if (!status.ok()) qFatal("%s failed: %s", op, status.ToString().c_str());
 }
 
-template <typename T>
-void add_packet(mediapipe::CalculatorGraph *graph, const std::string &stream,
-                T packet, int timestamp) {
-    check_status(graph->AddPacketToInputStream(
-        stream,
-        mediapipe::MakePacket<T>(packet).At(mediapipe::Timestamp(timestamp))));
+jesturepipe::JesturePipeConfig JesturePipeController::makeConfig(
+    const Resources& resources) {
+    return {
+        .palm_model_full_path = resources.palmDetectionFullPath(),
+        .palm_model_lite_path = resources.palmDetectionLitePath(),
+        .hand_landmark_model_full_path = resources.handLandmarkFullPath(),
+        .hand_landmark_model_lite_path = resources.handLandmarkLitePath(),
+    };
 }
 
-JesturePipeController::JesturePipeController(const JesturePipeInit &init,
-                                             QObject *parent) noexcept
-    : QObject(parent), running(false) {
+JesturePipeController::JesturePipeController(
+    Camera* camera, const jesturepipe::JesturePipeConfig& config,
+    QObject* parent)
+    : QObject(parent), camera(camera) {
     using namespace std::placeholders;
 
-    check_status(pipe.Initialize(init));
+    auto video_sink = new QVideoSink(this);
 
-    check_status(pipe.OnAnnotatedFrame(
-        std::bind(&JesturePipeController::onFrame, this, _1)));
-    check_status(pipe.OnGestureRecognition(
-        std::bind(&JesturePipeController::onGestureRecognized, this, _1)));
-    check_status(pipe.OnRecordedGesture(
-        std::bind(&JesturePipeController::onGestureRecorded, this, _1)));
+    QObject::connect(video_sink, &QVideoSink::videoFrameChanged, this,
+                     &JesturePipeController::processVideoFrame);
 
-    check_status(pipe.OnLandmarks(
-        std::bind(&JesturePipeController::OnLandmarks, this, _1)));
+    camera->captureSession()->addVideoSink(video_sink);
+
+    LOG(INFO) << "Initializing pipeline";
+    check_status("Pipeline initialization", pipeline.Initialize(config));
+
+    check_status("Landmark Callback",
+                 pipeline.OnLandmarks(std::bind(
+                     &JesturePipeController::onLandmarks, this, _1, _2)));
+
+    check_status(
+        "Gesture Recognition Callback",
+        pipeline.OnGestureRecognition(std::bind(
+            &JesturePipeController::onGestureRecognized, this, _1, _2)));
+
+    check_status("Gesture Recorded Callback",
+                 pipeline.OnRecordedGesture(std::bind(
+                     &JesturePipeController::onGestureRecorded, this, _1, _2)));
 }
 
-JesturePipeController::~JesturePipeController() noexcept { Stop(); }
+JesturePipeController::~JesturePipeController() { stop(); }
 
-void JesturePipeController::Start(JesturePipeSettings settings) noexcept {
-    if (running) return;
+bool JesturePipeController::isRunning() const { return pipeline.isRunning(); }
 
-    check_status(pipe.Start(settings.camera_index, settings.use_full));
-
-    running = true;
+bool JesturePipeController::isRecording() const {
+    return pipeline.IsRecording();
 }
 
-void JesturePipeController::Stop() noexcept {
-    if (!running) return;
-
-    check_status(pipe.Stop());
-
-    running = false;
+void JesturePipeController::restart(bool use_full) {
+    stop();
+    start(use_full);
 }
 
-void JesturePipeController::updateSettings(
-    JesturePipeSettings settings) noexcept {
-    Stop();
-    Start(settings);
+void JesturePipeController::start(bool use_full) {
+    LOG(INFO) << "Starting pipeline";
+    check_status("Pipeline start", pipeline.Start(use_full));
 }
 
-void JesturePipeController::addGesture(int gesture_id,
-                                       jesturepipe::Gesture gesture) noexcept {
-    pipe.AddGesture(gesture_id, std::move(gesture));
+void JesturePipeController::stop() {
+    LOG(INFO) << "Stopping pipeline";
+    check_status("Pipeline stop", pipeline.Stop());
 }
 
-void JesturePipeController::toggleRecording() noexcept {
-    check_status(pipe.SetRecording(!pipe.IsRecording()));
+void JesturePipeController::setRecording(bool recording) {
+    LOG(INFO) << "Set recording to " << recording;
+    check_status("Pipeline set recording", pipeline.SetRecording(recording));
 }
 
-absl::Status JesturePipeController::onFrame(
-    const mediapipe::Packet &packet) noexcept {
-    const mediapipe::ImageFrame &frame = packet.Get<mediapipe::ImageFrame>();
+void JesturePipeController::setGesture(int gesture_id, Gesture gesture) {
+    pipeline.SetGesture(gesture_id, gesture.pipe_gesture);
 
-    cv::Mat mat_view = mediapipe::formats::MatView(&frame);
+    LOG(INFO) << "Added gesture \"" << gesture.name << "\" with id "
+              << gesture_id;
+}
 
-    cv::Mat mat = mat_view.clone();
+void JesturePipeController::removeGesture(int gesture_id) {
+    pipeline.RemoveGesture(gesture_id);
 
-    emit frameReady(mat);
+    LOG(INFO) << "Removed gesture with id " << gesture_id;
+}
 
-    return absl::OkStatus();
+void JesturePipeController::clearGestures() {
+    pipeline.ClearGestures();
+
+    LOG(INFO) << "Cleared gestures";
+}
+
+void JesturePipeController::setAction(int gesture_id, ActionsList actions) {
+    std::vector<jesturepipe::Action> pipeline_actions;
+
+    for (auto action : actions.action_list) {
+        pipeline_actions.push_back(action.pipeline_action);
+    }
+
+    jesturepipe::ActionList pipeline_action_list{
+        .actions = pipeline_actions, .cursor_control = actions.cursor_control};
+
+    pipeline.SetAction(gesture_id, pipeline_action_list);
+
+    LOG(INFO) << "Added action with id " << gesture_id;
+}
+
+void JesturePipeController::removeAction(int gesture_id) {
+    pipeline.RemoveAction(gesture_id);
+
+    LOG(INFO) << "Removed gesture with id " << gesture_id;
+}
+
+void JesturePipeController::processVideoFrame(const QVideoFrame& video_frame) {
+    if (!isRunning()) return;
+
+    // WARNING: const dropped here
+    QVideoFrame frame = video_frame;
+
+    if (!frame.isValid()) {
+        LOG(WARNING) << "invalid frame";
+        return;
+    }
+
+    // If frame cannot be mapped, skip
+    if (!frame.map(QVideoFrame::ReadOnly)) return;
+
+    QImage img = frame.toImage().convertedTo(QImage::Format_RGB888);
+
+    assert(!img.isNull());
+
+    // https://github.com/dbzhang800/QtOpenCV/blob/master/cvmatandqimage.cpp
+
+    cv::Mat mat(img.height(), img.width(), CV_8UC(img.depth() / 8),
+                (uchar*)img.bits(), img.bytesPerLine());
+
+    if (camera->shouldReflect()) {
+        // qDebug() << "flipping frame";
+
+        cv::flip(mat, mat, 1);
+    }
+
+    auto input_frame = absl::make_unique<mediapipe::ImageFrame>(
+        mediapipe::ImageFormat::SRGB, mat.cols, mat.rows,
+        mediapipe::ImageFrame::kDefaultAlignmentBoundary);
+
+    cv::Mat input_frame_mat = mediapipe::formats::MatView(input_frame.get());
+
+    mat.copyTo(input_frame_mat);
+
+    unsigned long timestamp = frame_time++;
+
+    check_status("Add frame to pipeline",
+                 pipeline.AddFrame(std::move(input_frame), timestamp));
+
+    frame.unmap();
 }
 
 absl::Status JesturePipeController::onGestureRecognized(
-    const int &gesture_id) noexcept {
-    emit gestureRecognizer(gesture_id);
+    int gesture_id, unsigned long timestamp) {
+    LOG(INFO) << "Recognized gesture with id " << gesture_id << " at "
+              << timestamp;
+
+    emit gestureRecognized(gesture_id, timestamp);
 
     return absl::OkStatus();
 }
 
 absl::Status JesturePipeController::onGestureRecorded(
-    const jesturepipe::Gesture &gesture) noexcept {
-    emit gestureRecorded(gesture);
-
+    jesturepipe::Gesture gesture, unsigned long timestamp) {
+    emit gestureRecorded(gesture, timestamp);
     return absl::OkStatus();
 }
 
-absl::Status JesturePipeController::OnLandmarks(
-    const std::vector<mediapipe::NormalizedLandmarkList> landmarks) noexcept {
-    emit landmarksReady(landmarks);
+absl::Status JesturePipeController::onLandmarks(
+    std::vector<mediapipe::NormalizedLandmarkList> landmarks,
+    unsigned long timestamp) {
+    emit landmarksReady(landmarks, timestamp);
 
     return absl::OkStatus();
 }

@@ -3,52 +3,65 @@
 
 #include <QObject>
 
-#include "absl/status/status.h"
-#include "absl/status/statusor.h"
-#include "jesture/jesturepipe/settings.h"
+#include "jesture/jesturepipe/action.h"
+#include "jesture/jesturepipe/gesture.h"
+#include "jesture/managers/camera.h"
+#include "jesture/managers/resources.h"
 #include "jesturepipe/gesture/gesture.h"
 #include "jesturepipe/jesturepipe.h"
-#include "mediapipe/framework/calculator_framework.h"
-#include "mediapipe/framework/port/opencv_core_inc.h"
 
 namespace jesture {
+
 class JesturePipeController : public QObject {
     Q_OBJECT
-
-    // Q_DISABLE_COPY(JesturePipeController)
-
-    // CHECKME: Not sure I need to disable move, but better safe than sorry for
-    // now.
-    Q_DISABLE_COPY_MOVE(JesturePipeController)
    public:
-    explicit JesturePipeController(const JesturePipeInit& init,
-                                   QObject* parent = nullptr) noexcept;
+    static jesturepipe::JesturePipeConfig makeConfig(
+        const Resources& resources);
 
-    ~JesturePipeController() noexcept;
+    explicit JesturePipeController(Camera* camera,
+                                   const jesturepipe::JesturePipeConfig& config,
+                                   QObject* parent = nullptr);
 
-   public slots:
-    void Start(JesturePipeSettings settings) noexcept;
-    void updateSettings(JesturePipeSettings settings) noexcept;
-    void addGesture(int gesture_id, jesturepipe::Gesture gesture) noexcept;
-    void toggleRecording() noexcept;
-    void Stop() noexcept;
+    ~JesturePipeController();
+
+    bool isRunning() const;
+    bool isRecording() const;
 
    signals:
-    void frameReady(cv::Mat frame);
-    void gestureRecognizer(int gesture_id);
-    void gestureRecorded(jesturepipe::Gesture gesture);
-    void landmarksReady(std::vector<mediapipe::NormalizedLandmarkList>);
+    void landmarksReady(
+        std::vector<mediapipe::NormalizedLandmarkList> landmarks,
+        unsigned long timestamp);
+    void gestureRecognized(int gesture_id, unsigned long timestamp);
+    void gestureRecorded(jesturepipe::Gesture gesture, unsigned long timestamp);
+
+   public slots:
+    void restart(bool use_full);
+    void start(bool use_full);
+    void stop();
+
+    void setRecording(bool recording);
+
+    void setGesture(int gesture_id, Gesture gesture);
+    void removeGesture(int gesture_id);
+    void clearGestures();
+
+    void setAction(int gesture_id, ActionsList action);
+    void removeAction(int gesture_id);
+
+   private slots:
+    void processVideoFrame(const QVideoFrame& video_frame);
 
    private:
-    absl::Status onFrame(const mediapipe::Packet& packet) noexcept;
-    absl::Status onGestureRecognized(const int& gesture_id) noexcept;
-    absl::Status onGestureRecorded(
-        const jesturepipe::Gesture& gesture) noexcept;
-    absl::Status OnLandmarks(
-        const std::vector<mediapipe::NormalizedLandmarkList>) noexcept;
+    absl::Status onGestureRecognized(int gesture_id, unsigned long timestamp);
+    absl::Status onGestureRecorded(jesturepipe::Gesture gesture,
+                                   unsigned long timestamp);
+    absl::Status onLandmarks(
+        std::vector<mediapipe::NormalizedLandmarkList> landmarks,
+        unsigned long timestamp);
 
-    bool running;
-    jesturepipe::JesturePipe pipe;
+    Camera* camera;
+    jesturepipe::JesturePipe pipeline;
+    int frame_time = 0;
 };
 }  // namespace jesture
 

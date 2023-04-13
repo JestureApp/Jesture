@@ -1,66 +1,58 @@
 #ifndef JESTURE_MAIN_WINDOW_H
 #define JESTURE_MAIN_WINDOW_H
 
-#include <QListWidget>
-#include <QtGui/QAction>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QStackedLayout>
-#include <QtWidgets/QWidget>
-#include <vector>
+#include <QtWidgets>
 
-#include "jesture/components/camera_feed.h"
-#include "jesture/jesturepipe/settings.h"
-#include "jesturepipe/controller.h"
+#include "jesture/components/gesture_list_view.h"
+#include "jesture/components/pipeline_view.h"
+#include "jesture/components/recording_review.h"
+#include "jesture/components/settings_view.h"
+#include "jesture/components/sidebar.h"
+#include "jesture/jesturepipe/gesture.h"
+#include "jesture/jesturepipe/landmarks.h"
+#include "jesture/managers/camera.h"
+#include "jesture/managers/config.h"
+#include "jesture/managers/resources.h"
 #include "jesturepipe/gesture/gesture.h"
+
+namespace jesture {
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
    public:
-    MainWindow(jesture::JesturePipeSettings initial_settings,
-               std::vector<jesturepipe::Gesture> initial_gestures,
-               QWidget* parent = 0);
+    explicit MainWindow(Camera* camera, Resources* resources, Config* config,
+                        QWidget* parent = nullptr);
+
    signals:
     void quit();
-    void update_camera_setting(int index);
-    void toggle_recording();
+    void set_recording(bool on);
+    void open_recorded_gesture(jesturepipe::Gesture gesture);
+    int add_gesture(Gesture gesture);
+
    public slots:
-    void add_gesture(jesturepipe::Gesture gesture);
+    void drawLandmarks(std::vector<Landmarks>);
+    void show_pipeline_view();
+    void show_settings_view();
+    void show_gesture_list_view();
+    void get_recorded_gesture(jesturepipe::Gesture gesture,
+                              unsigned long timestamp);
+
    private slots:
-    void open_settings();
-    void close_settings();
-    void open_inspector();
-    void close_inspector();
-    void inspect_gesture(int index);
-    void hide_window();
-    void show_window();
-    void toggle_recording_display();
+    void handle_recording_update(bool on);
+    void handle_save_gesture(Gesture gesture);
 
    private:
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-
-    void setup_general();
-    void setup_settings(jesture::JesturePipeSettings initial_settings);
-    void setup_inspector(std::vector<jesturepipe::Gesture> initial_gestures);
-    void setup_system_tray();
-    void setup_stylesheet();
-
-    QWidget* recording_overlay;
-    QWidget* interactives;
-    QStackedLayout* interactives_layout;
-    jesture::CameraFeed* camera_feed;
-    QWidget* general;
-    QWidget* settings;
-    QWidget* inspector;
-    QListWidget* gesture_list;
-
-    QAction* hide_action;
-    QAction* show_action;
-    QAction* quit_action;
-
-    int mouse_x;
-    int mouse_y;
+    QStackedLayout* content_layout;
+    PipelineView* pipeline_view;
+    SettingsView* settings_view;
+    GestureListView* gesture_list_view;
+    RecordingReview* recording_review;
+    SidebarItem* camera_tab;
+    SidebarItem* settings_tab;
+    SidebarItem* gesture_tab;
 };
 
-#endif
+}  // namespace jesture
+
+#endif  // JESTURE_MAIN_WINDOW_H
