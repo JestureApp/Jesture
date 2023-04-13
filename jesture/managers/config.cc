@@ -144,7 +144,125 @@ void Config::init(bool from_file) {
 
         for (auto name : gestures_obj.keys()) {
             QJsonObject gesture_obj = gestures_obj[name].toObject();
+
+            std::vector<jesturepipe::GestureFrame> frames;
+
+            QJsonArray frames_array = gesture_obj["frames"].toArray();
+            for (auto frame_val : frames_array) {
+                auto frame_obj = frame_val.toObject();
+
+                absl::optional<double> movement_direction;
+
+                if (frame_obj.find("movement_direction") != frame_obj.end()) {
+                    movement_direction =
+                        frame_obj["movement_direction"].toDouble();
+                }
+
+                auto frame = jesturepipe::GestureFrame{
+                    .hand_shape =
+                        {
+                            .index_direction =
+                                frame_obj["index_direction"].toDouble(),
+                            .middle_direction =
+                                frame_obj["middle_direction"].toDouble(),
+                            .ring_direction =
+                                frame_obj["ring_direction"].toDouble(),
+                            .pinky_direction =
+                                frame_obj["pinky_direction"].toDouble(),
+                            .thumb_direction =
+                                frame_obj["thumb_direction"].toDouble(),
+                        },
+                    .movement_direction = movement_direction};
+
+                frames.push_back(frame);
+            }
+
+            int id = addGesture(Gesture(
+                name.toStdString(), jesturepipe::Gesture(std::move(frames))));
+
+            QJsonObject action_mapping_obj =
+                gesture_obj["action_mapping"].toObject();
+
+            std::vector<Action> action_list;
+
+            for (auto action_val : action_mapping_obj["actions"].toArray()) {
+                QJsonObject action_obj = action_val.toObject();
+
+                auto action_type = action_obj["type"].toString().toStdString();
+
+                Action action;
+
+                if (action_type == "NoOp") {
+                    action = NoOp();
+                } else if (action_type == "KeysPress") {
+                    action = KeysPress(action_obj["sequence"].toString());
+                } else if (action_type == "KeysRelease") {
+                    action = KeysRelease(action_obj["sequence"].toString());
+                } else if (action_type == "Keystroke") {
+                    action = Keystroke(action_obj["sequence"].toString());
+                } else if (action_type == "MousePress") {
+                    auto button = action_obj["button"].toString();
+
+                    if (button == "left") {
+                        action = Action{actions::action::MousePress::LeftPress};
+                    } else if (button == "middle") {
+                        action =
+                            Action{actions::action::MousePress::MiddlePress};
+                    } else if (button == "right") {
+                        action =
+                            Action{actions::action::MousePress::RightPress};
+                    }
+                } else if (action_type == "MouseRelease") {
+                    auto button = action_obj["button"].toString();
+
+                    if (button == "left") {
+                        action =
+                            Action{actions::action::MouseRelease::LeftRelease};
+                    } else if (button == "middle") {
+                        action = Action{
+                            actions::action::MouseRelease::MiddleRelease};
+                    } else if (button == "right") {
+                        action =
+                            Action{actions::action::MouseRelease::RightRelease};
+                    }
+                } else if (action_type == "MouseClick") {
+                    auto button = action_obj["button"].toString();
+
+                    if (button == "left") {
+                        action = Action{actions::action::MouseClick::LeftClick};
+                    } else if (button == "middle") {
+                        action =
+                            Action{actions::action::MouseClick::MiddleClick};
+                    } else if (button == "right") {
+                        action =
+                            Action{actions::action::MouseClick::RightClick};
+                    }
+                }
+
+                action_list.push_back(action);
+            }
+
+            jesturepipe::CursorControl cursor_control =
+                jesturepipe::CursorControl::None;
+
+            if (action_mapping_obj.contains("cursor_control")) {
+                auto cursor_control_val =
+                    action_mapping_obj["cursor_control"].toString();
+
+                if (cursor_control_val == "grab") {
+                    cursor_control = jesturepipe::CursorControl::Grab;
+                } else if (cursor_control_val == "release") {
+                    cursor_control = jesturepipe::CursorControl::Release;
+                } else if (cursor_control_val == "toggle") {
+                    cursor_control = jesturepipe::CursorControl::Toggle;
+                }
+            }
+
+            setAction(id, ActionsList{.action_list = action_list,
+                                      .cursor_control = cursor_control});
         }
+
+        gestures_file.close();
     }
 }
 
