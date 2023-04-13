@@ -21,6 +21,10 @@ Config::Config(QObject* parent)
 
 QCameraDevice Config::cameraDevice() const { return camera_device; }
 
+const std::map<int, Gesture>& Config::getGestures() const { return gestures; }
+
+const std::map<int, ActionsList>& Config::getActions() const { return actions; }
+
 void Config::setCameraDevice(QCameraDevice camera_device) {
     this->camera_device = camera_device;
 
@@ -337,7 +341,7 @@ void Config::setToDefaultGestures() {
     addGesture(Gesture("SlideDown", jesturepipe::Gesture::SlideDown()));
     int grab = addGesture(Gesture("Grab", jesturepipe::Gesture::GrabMouse()));
     int release =
-        addGesture(Gesture("Release", jesturepipe::Gesture::GrabMouse()));
+        addGesture(Gesture("Release", jesturepipe::Gesture::LeaveMouse()));
     addGesture(Gesture("Thumbs Up", jesturepipe::Gesture::ThumbsUp()));
 
     setAction(slide_left,
