@@ -3,16 +3,6 @@ load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files", "pkg_mklink"
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
-# distribution(
-#     name = "dist",
-#     bin = "//jesture",
-#     deb_package_desc = "TODO",
-#     deb_package_name = "jesture",
-#     maintainer = "TODO",
-#     product_name = "jesture",
-#     version = "0.5.0",
-# )
-
 VERSION = "0.5.0"
 
 dist_vars(
@@ -60,8 +50,17 @@ pkg_tar(
 pkg_deb(
     name = "jesture_deb",
     data = ":jesture_linux_tar",
-    description = "TODO",
-    maintainer = "",
+    depends = [
+        "qt6-base-dev",
+        "qt6-wayland",
+        "qt6-declarative-dev",
+        "qt6-multimedia-dev",
+        "libqt6svg6-dev",
+        "libx11-dev",
+        "libopencv-dev",
+    ],
+    description = "Application to control you computer through hand gestures",
+    maintainer = "carson.storm@outlook.com",
     package = "jesture",
     package_file_name = "{product_name}-{version}-{arch}.deb",
     package_variables = ":jesture_dist_vars",

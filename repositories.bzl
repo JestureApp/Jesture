@@ -30,29 +30,23 @@ def jesture_repositories():
     )
 
     maybe(
-        git_repository,
+        http_archive,
         name = "actions",
-        remote = "git@capstone-cs.eng.utah.edu:jesture/actions.git",
-        commit = "0a2b9cbfb9fd579b1581c31241543bffdc305a69",
+        strip_prefix = "Actions-1.0.0",
+        url = "https://github.com/JestureApp/Actions/archive/refs/tags/v1.0.0.zip",
     )
-
-    # maybe(
-    #     native.local_repository,
-    #     name = "actions",
-    #     path = "../Actions",
-    # )
 
     maybe(
-        git_repository,
+        http_archive,
         name = "jesturepipe",
-        remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
-        commit = "632ca3728f1d4c94f1f5714876d78e85475218fb",
+        strip_prefix = "JesturePipe-1.0.0",
+        url = "https://github.com/JestureApp/JesturePipe/archive/refs/tags/v1.0.0.zip",
     )
-
     # maybe(
-    #     native.local_repository,
+    #     git_repository,
     #     name = "jesturepipe",
-    #     path = "../JesturePipe",
+    #     remote = "git@capstone-cs.eng.utah.edu:jesture/jesturepipe.git",
+    #     commit = "632ca3728f1d4c94f1f5714876d78e85475218fb",
     # )
 
     http_archive(
